@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ch">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <title>Document</title>
+    <style>
+        #main {
+            display: flex;
+        }
+        .left {
+            padding: 10px;
+        }
+        .right {
+            padding: 10px;
+            width: 100%;
+        }
+        @media screen and (max-width: 600px) {
+            #main {
+                flex-wrap: wrap;
+            }
+        }
+        .el-input__inner {
+            width: 210px;
+        }
+        .el-tabs__item {
+            padding: 0 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div class="left">
+            <el-form ref="form" label-width="80px" size="small">
+                <el-form-item label="最小倍数">
+                    <el-input v-model="min"></el-input>
+                </el-form-item>
+                <el-form-item label="最大倍数">
+                    <el-input v-model="max"></el-input>
+                </el-form-item>
+                <el-form-item label="步长">
+                    <el-input v-model="step"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-tabs v-model="num">
+                <el-tab-pane label="三道菜" :name="3"></el-tab-pane>
+                <el-tab-pane label="四道菜" :name="4"></el-tab-pane>
+                <el-tab-pane label="五道菜" :name="5"></el-tab-pane>
+                <el-tab-pane label="六道菜" :name="6"></el-tab-pane>
+            </el-tabs>
+            <el-form ref="form" label-width="80px" size="small">
+                <el-form-item v-for="(item, index) in num" :label="'第' + (index + 1) + '道菜'">
+                    <el-select v-model="repices[index]" placeholder="请选择菜谱" clearable filterable>
+                        <el-option
+                            v-for="(r, i) in data"
+                            :key="i"
+                            :label="r.name + '(' + r.value + ')'"
+                            :value="r.name + ',' + r.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="奖励分">
+                    <el-input v-model="result" style="width: 210px"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-button style="float: right" size="small" @click="toTry">计算</el-button>
+        </div>
+        <div class="right">
+            <el-table :data="tableData" style="width: 100%" height="550">
+                <el-table-column :filters='r1_f' :filter-method="filterHandler" prop="v1" :label="r1"></el-table-column>
+                <el-table-column :filters='r2_f' :filter-method="filterHandler" prop="v2" :label="r2"></el-table-column>
+                <el-table-column :filters='r3_f' :filter-method="filterHandler" prop="v3" :label="r3"></el-table-column>
+                <el-table-column :filters='r4_f' :filter-method="filterHandler" prop="v4" :label="r4" v-if="num >= 4"></el-table-column>
+                <el-table-column :filters='r5_f' :filter-method="filterHandler" prop="v5" :label="r5" v-if="num >= 5"></el-table-column>
+                <el-table-column :filters='r6_f' :filter-method="filterHandler" prop="v6" :label="r6" v-if="num >= 6"></el-table-column>
+            </el-table>
+        </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+        $(function () {
+            var app = new Vue({
+                el: '#main',
+                data: {
+                    min: '-5',
+                    max: '4',
+                    step: '1',
+                    num: 3,
+                    repices: [],
+                    result: '0',
+                    tableData: [],
+                    r1: '菜谱1',
+                    r2: '菜谱2',
+                    r3: '菜谱3',
+                    r4: '菜谱4',
+                    r5: '菜谱5',
+                    r6: '菜谱6',
+                    f_t: [
+                        { text: '大于0', value: 1 },
+                        { text: '等于0', value: 0 },
+                        { text: '小于0', value: -1 }
+                    ],
+                    r1_f: [],
+                    r2_f: [],
+                    r3_f: [],
+                    r4_f: [],
+                    r5_f: [],
+                    r6_f: [],
+                    data: [
+                        { name: '九珍海鲜', value: 811 },
+                        { name: '咖喱鱼丸', value: 1153 },
+                        { name: '红蟳米糕', value: 1608 },
+                        { name: '酸辣笋尖粉', value: 198 },
+                        { name: '咖喱香辣虾', value: 1556 },
+                        { name: '鱼头豆腐汤', value: 616 },
+                        { name: '一颗赛艇', value: 1216 },
+                        { name: '腐衣黄鱼卷', value: 1193 },
+                        { name: '鱿鱼筒烤饭', value: 837 },
+                        { name: '雪笋蒸干贝', value: 1332 },
+                        { name: '松鼠桂鱼', value: 1639 },
+                        { name: '三文鱼茶泡饭', value: 1303 },
+                        { name: '迷之月饼', value: 270 },
+                        { name: '玲珑豆腐', value: 809 },
+                        { name: '蛤蜊豆腐汤', value: 402 },
+                        { name: '蛋白蟹肉', value: 1278 },
+                        { name: '天妇罗拼盘', value: 1270 },
+                        { name: '绿咖喱鸡肉卷', value: 1000 },
+                        { name: '香煎鸡胸肉', value: 975 },
+                        { name: '夏日风情堡', value: 962 },
+                        { name: '柴鱼豆腐', value: 957 },
+                        { name: '水煮鱼', value: 1148 },
+                        { name: '三杯鸡', value: 818 },
+                        { name: '绣球仙贝', value: 559 },
+                        { name: '冷锅鱼', value: 1852 },
+                        { name: '圣诞蛋糕', value: 225 },
+                        { name: '金缕虾', value: 899 },
+                        { name: '白雪金狗', value: 674 },
+                        { name: '圣诞烤鸡', value: 669 },
+                        { name: '圣诞沙拉', value: 222 },
+                        { name: '腊味合蒸', value: 1332 },
+                        { name: '干锅香辣虾', value: 874 },
+                        { name: '黑椒牛仔骨', value: 655 },
+                        { name: '虾仁跑蛋', value: 654 },
+                        { name: '汤圆', value: 434 },
+                        { name: '干锅鱼头', value: 866 },
+                        { name: '烤肉拼盘', value: 1032 },
+                        { name: '不难吃早餐', value: 516 },
+                        { name: '煎牛排', value: 1228 },
+                        { name: '抹茶火锅', value: 669 },
+                        { name: '蚵仔煎', value: 292 },
+                        { name: '杯子蛋糕', value: 584 },
+                        { name: '香辣蟹', value: 1154 },
+                        { name: '炸鸡咖喱蛋包饭', value: 565 },
+                        { name: '东坡肉', value: 752 },
+                        { name: '章鱼小丸子', value: 742 },
+                        { name: '酱爆鱿鱼', value: 882 },
+                        { name: '番茄虾仁盅', value: 273 },
+                        { name: '鸡汤煮干丝', value: 1080 },
+                        { name: '威灵顿牛排', value: 858 },
+                        { name: '糟四宝', value: 425 },
+                        { name: '牛肉火锅', value: 844 },
+                        { name: '抹茶白玉', value: 420 },
+                        { name: '红油抄手', value: 491 },
+                        { name: '腊味煲仔饭', value: 390 },
+                        { name: '孔雀迎宾', value: 1939 },
+                        { name: '油爆双脆', value: 645 },
+                        { name: '馕包肉', value: 378 },
+                        { name: '九转大肠', value: 940 },
+                        { name: '黄豆肥肠煲', value: 468 },
+                        { name: '牡丹燕菜', value: 623 },
+                        { name: '毛血旺', value: 614 },
+                        { name: '鸡肉火锅', value: 456 },
+                        { name: '小鱼锅贴', value: 362 },
+                        { name: '鸡肉蘑菇汤', value: 361 },
+                        { name: '柠檬鸡丝', value: 451 },
+                        { name: '豆豉蒸排骨', value: 721 },
+                        { name: '辣子鸡', value: 299 },
+                        { name: '葱姜辣炒蛤蜊', value: 298 },
+                        { name: '蛋酒', value: 143 },
+                        { name: '菠萝培根卷', value: 222 },
+                        { name: '富贵双方', value: 441 },
+                        { name: '京酱肉丝', value: 573 },
+                        { name: '猪肚鸡', value: 558 },
+                        { name: '咖喱土豆牛肉', value: 478 },
+                        { name: '豆豉蒸鱼', value: 417 },
+                        { name: '蒜泥白肉', value: 330 },
+                        { name: '酸菜鱼', value: 818 },
+                        { name: '恶作剧便当', value: 544 },
+                        { name: '串串锅', value: 538 },
+                        { name: '大骨高汤', value: 636 },
+                        { name: '咖喱土豆鸡', value: 524 },
+                        { name: '灯笼茄子', value: 520 },
+                        { name: '菠萝咕咾肉', value: 380 },
+                        { name: '黄豆小排汤', value: 505 },
+                        { name: '老婆饼', value: 188 },
+                        { name: '红酒鸭胸', value: 498 },
+                        { name: '粉丝蒸扇贝', value: 495 },
+                        { name: '牛肉手抓饭', value: 295 },
+                        { name: '竹筒饭', value: 590 },
+                        { name: '茄子猪肉卷', value: 294 },
+                        { name: '牙签肉', value: 242 },
+                        { name: '木乃伊香肠', value: 363 },
+                        { name: '牛肉披萨', value: 482 },
+                        { name: '芝麻八爪鱼', value: 178 },
+                        { name: '咸鱼', value: 176 },
+                        { name: '雪花鱼糕', value: 1614 },
+                        { name: '蟹黄鱼籽丸', value: 1365 },
+                        { name: '刺身拼盘', value: 1322 },
+                        { name: '芦笋鲜虾沙拉', value: 1039 },
+                        { name: '情人巧克力', value: 1193 },
+                        { name: '庆典蛋糕', value: 1681 },
+                        { name: '冰醉小龙虾', value: 955 },
+                        { name: '苦艾酒', value: 514 },
+                        { name: '姜饼屋', value: 826 },
+                        { name: '巧果', value: 408 },
+                        { name: '水晶肴蹄', value: 572 },
+                        { name: '邪神烤鸡', value: 2261 },
+                        { name: '卤水拼盘', value: 550 },
+                        { name: '特调饮品', value: 425 },
+                        { name: '日出鸡尾酒', value: 525 },
+                        { name: '南瓜鱼翅盅', value: 1968 },
+                        { name: '生拌牛肉', value: 486 },
+                        { name: '血腥玛丽', value: 641 },
+                        { name: '三色凉糕', value: 317 },
+                        { name: '雄黄酒', value: 316 },
+                        { name: '沙嗲拼盘', value: 1874 },
+                        { name: '青团', value: 306 },
+                        { name: '蟹黄鱼翅', value: 1804 },
+                        { name: '酸奶麦片', value: 437 },
+                        { name: '醉蟹', value: 567 },
+                        { name: '金鱼鸭掌', value: 1329 },
+                        { name: '肉蟹煲', value: 1584 },
+                        { name: '鱼跃龙门', value: 1746 },
+                        { name: '口水鸡', value: 373 },
+                        { name: '烟熏鲑鱼', value: 989 },
+                        { name: '鳝筒烧肉', value: 1439 },
+                        { name: '擂茶', value: 357 },
+                        { name: '幽灵咖喱', value: 1715 },
+                        { name: '夫妻肺片', value: 315 },
+                        { name: '风味凉皮', value: 314 },
+                        { name: '罗勒青酱面', value: 1253 },
+                        { name: '佛跳墙', value: 2482 },
+                        { name: '麻辣小龙虾', value: 1236 },
+                        { name: '味增汤', value: 970 },
+                        { name: '寿司', value: 296 },
+                        { name: '仰望星空', value: 1180 },
+                        { name: '孔雀开屏', value: 1533 },
+                        { name: '蒜蓉芝士焗龙虾', value: 2288 },
+                        { name: '虾仁豆腐', value: 758 },
+                        { name: '得莫利炖鱼', value: 1477 },
+                        { name: '咖喱蟹', value: 1447 },
+                        { name: '德式拼盘', value: 1720 },
+                        { name: '香煎银鳕鱼', value: 1430 },
+                        { name: '炒鳝糊', value: 1225 },
+                        { name: '龙井虾仁', value: 1705 },
+                        { name: '金钱发菜', value: 210 },
+                        { name: '虾片沙拉', value: 281 },
+                        { name: '蛤蜊蒸蛋', value: 276 },
+                        { name: '三色煎饼', value: 172 },
+                        { name: '毛蟹年糕', value: 457 },
+                        { name: '鸡肉南瓜焗饭', value: 386 },
+                        { name: '爱心宽油蛋', value: 538 },
+                        { name: '回锅肉', value: 336 },
+                        { name: '四喜饺', value: 216 },
+                        { name: '三鲜豆皮', value: 321 },
+                        { name: '萝卜小排汤', value: 255 },
+                        { name: '菠萝饭', value: 253 },
+                        { name: '宫保鸡丁', value: 316 },
+                        { name: '腌笃鲜', value: 834 },
+                        { name: '炸鱼排', value: 416 },
+                        { name: '酸汤肥牛', value: 356 },
+                        { name: '咖喱饺', value: 207 },
+                        { name: '关东煮', value: 206 },
+                        { name: '杏鲍菇牛肉粒', value: 399 },
+                        { name: '芝士猪肉卷', value: 395 },
+                        { name: '蟹粉豆腐', value: 237 },
+                        { name: '香煎萝卜糕', value: 294 },
+                        { name: '八宝饭', value: 191 },
+                        { name: '排骨年糕', value: 189 },
+                        { name: '串烤盐焗虾', value: 281 },
+                        { name: '黄焖鸡', value: 449 },
+                        { name: '南瓜粥', value: 318 },
+                        { name: '青椒塞肉', value: 271 },
+                        { name: '虾饺皇', value: 270 },
+                        { name: '辣条', value: 135 },
+                        { name: '撒尿牛丸', value: 357 },
+                        { name: '猪血豆腐串', value: 132 },
+                        { name: '洋葱肥肠', value: 176 },
+                        { name: '湘西外婆菜', value: 421 },
+                        { name: '狗粮', value: 174 },
+                        { name: '三丝抱豆', value: 172 },
+                        { name: '酸辣汤', value: 82 },
+                        { name: '金针菇牛肉卷', value: 340 },
+                        { name: '蟹粉狮子头', value: 667 },
+                        { name: '卤肉饭', value: 333 },
+                        { name: '扣三丝', value: 485 },
+                        { name: '客家小炒肉', value: 240 },
+                        { name: '元宝肘子', value: 237 },
+                        { name: '肉酱千层面', value: 235 },
+                        { name: '葱香烤鱼', value: 370 },
+                        { name: '辣白菜火锅', value: 368 },
+                        { name: '三鲜砂锅', value: 230 },
+                        { name: '蘸酱菜', value: 184 },
+                        { name: '老鸭粉丝汤', value: 183 },
+                        { name: '五谷丰登', value: 183 },
+                        { name: '爆炒猪肝', value: 181 },
+                        { name: '玫瑰花卷', value: 178 },
+                        { name: '糯米蛋', value: 177 },
+                        { name: '茶干', value: 147 },
+                        { name: '锅包肉', value: 350 },
+                        { name: '儿童餐', value: 350 },
+                        { name: '酸辣鸡杂', value: 145 },
+                        { name: '南瓜饼', value: 145 },
+                        { name: '猪血糕', value: 287 },
+                        { name: '元宝饺子', value: 172 },
+                        { name: '牛肉肠粉', value: 138 },
+                        { name: '迷你三明治', value: 66 },
+                        { name: '紫米双皮奶', value: 164 },
+                        { name: '猪耳碟头', value: 65 },
+                        { name: '南瓜紫薯挞', value: 135 },
+                        { name: '奶油甜酒', value: 161 },
+                        { name: '鸭肉皮蛋卷', value: 201 },
+                        { name: '红烧牛肉面', value: 159 },
+                        { name: '京葱鸡肉串', value: 132 },
+                        { name: '凤梨酥', value: 261 },
+                        { name: '红烧排骨', value: 260 },
+                        { name: '水晶桃花', value: 97 },
+                        { name: '糯米团子', value: 128 },
+                        { name: '红三剁', value: 126 },
+                        { name: '咖喱什锦蔬菜', value: 187 },
+                        { name: '桃花酒', value: 124 },
+                        { name: '海鲜面', value: 281 },
+                        { name: '鸡肉蔬菜沙拉', value: 175 },
+                        { name: '鱼香茄子', value: 175 },
+                        { name: '糖蒜', value: 138 },
+                        { name: '原汁白蛤蜊', value: 55 },
+                        { name: '洋葱小炒肉', value: 137 },
+                        { name: '芝士焗蘑菇', value: 114 },
+                        { name: '梅菜扣肉', value: 227 },
+                        { name: '酒酿小圆子', value: 85 },
+                        { name: '豆皮shou司', value: 54 },
+                        { name: '窝蛋牛肉粥', value: 84 },
+                        { name: '脆皮烧肉', value: 112 },
+                        { name: '地三鲜', value: 111 },
+                        { name: '香肠爱心蛋', value: 83 },
+                        { name: '笋干烧豆', value: 163 },
+                        { name: '片皮鸭', value: 319 },
+                        { name: '烤蔬菜沙拉', value: 127 },
+                        { name: '鱼香肉丝', value: 105 },
+                        { name: '两面黄', value: 102 },
+                        { name: '麻辣鸭头', value: 101 },
+                        { name: '豆腐奶茶', value: 75 },
+                        { name: '炸春卷', value: 149 },
+                        { name: '油焖笋', value: 238 },
+                        { name: '熊猫饭团', value: 198 },
+                        { name: '生滚鱼片粥', value: 73 },
+                        { name: '煎饼馃子', value: 73 },
+                        { name: '菠萝班戟', value: 194 },
+                        { name: '杭椒牛柳', value: 193 },
+                        { name: '家常豆腐', value: 189 },
+                        { name: '牛肉串', value: 92 },
+                        { name: '茄汁锅巴', value: 69 },
+                        { name: '罗宋汤', value: 157 },
+                        { name: '香酥鸭', value: 136 },
+                        { name: '肉夹馍', value: 108 },
+                        { name: '肉末茄子', value: 135 },
+                        { name: '腊肠', value: 43 },
+                        { name: '蚂蚁上树', value: 67 },
+                        { name: '卤水门腔', value: 87 },
+                        { name: '泡椒凤爪', value: 87 },
+                        { name: '土豆饼', value: 129 },
+                        { name: '酿黄瓜', value: 64 },
+                        { name: '荷花豆腐', value: 101 },
+                        { name: '辣白菜土豆片', value: 83 },
+                        { name: '巧芽汤', value: 61 },
+                        { name: '炒年糕', value: 61 },
+                        { name: '小笼包', value: 61 },
+                        { name: '蛋黄焗南瓜', value: 81 },
+                        { name: '鳗鱼炒饭', value: 190 },
+                        { name: '奶黄猪仔包', value: 59 },
+                        { name: '番茄芝士', value: 78 },
+                        { name: '辣炒萝卜干', value: 77 },
+                        { name: '豚骨拉面', value: 92 },
+                        { name: '香烤猪颈肉', value: 114 },
+                        { name: '辣肉面', value: 57 },
+                        { name: '牛肉卷饼', value: 113 },
+                        { name: '番茄肥牛', value: 89 },
+                        { name: '海鲜粥', value: 111 },
+                        { name: '冰激凌华夫饼', value: 110 },
+                        { name: '碳烤牛舌', value: 73 },
+                        { name: '手指饼干', value: 35 },
+                        { name: '温泉蛋', value: 35 },
+                        { name: '鸡清汤青拉面', value: 86 },
+                        { name: '烧麦', value: 107 },
+                        { name: '黄瓜炒肉', value: 142 },
+                        { name: '青椒土豆丝', value: 84 },
+                        { name: '泡菜炒饭', value: 104 },
+                        { name: '蛋黄粽', value: 83 },
+                        { name: '葱油鸡', value: 50 },
+                        { name: '肉末土豆泥', value: 78 },
+                        { name: '臭豆腐', value: 96 },
+                        { name: '蔬菜杯', value: 47 },
+                        { name: '红烧萝卜', value: 62 },
+                        { name: '牛肉煎包', value: 46 },
+                        { name: '青椒香干', value: 46 },
+                        { name: '干炒牛河', value: 90 },
+                        { name: '盐酥鸡', value: 60 },
+                        { name: '扬州炒饭', value: 70 },
+                        { name: '咸蛋肉饼', value: 43 },
+                        { name: '四季烤麸', value: 57 },
+                        { name: '猪排饭', value: 136 },
+                        { name: '番茄鸡蛋面', value: 64 },
+                        { name: '麻婆豆腐', value: 78 },
+                        { name: '蘑菇炒肉', value: 77 },
+                        { name: '薯条', value: 38 },
+                        { name: '黄瓜萝卜卷', value: 24 },
+                        { name: '炸茄盒', value: 59 },
+                        { name: '洋葱圈', value: 49 },
+                        { name: '牛奶鸡蛋布丁', value: 84 },
+                        { name: '椒盐排条', value: 47 },
+                        { name: '锅贴', value: 35 },
+                        { name: '皮蛋瘦肉粥', value: 35 },
+                        { name: '蛋包饭', value: 46 },
+                        { name: '椰丝牛奶', value: 33 },
+                        { name: '剁椒皮蛋', value: 30 },
+                        { name: '白粽', value: 30 },
+                        { name: '清炒黄豆芽', value: 39 },
+                        { name: '鸡蛋饼', value: 18 },
+                        { name: '腌茄子', value: 28 },
+                        { name: '炸牛奶', value: 56 },
+                        { name: '老虎菜', value: 27 },
+                        { name: '香菇青菜', value: 35 },
+                        { name: '菠萝派', value: 50 },
+                        { name: '豆腐青菜', value: 24 },
+                        { name: '白菜猪肉饺', value: 38 },
+                        { name: '凉拌黄瓜', value: 23 },
+                        { name: '阳春面', value: 30 },
+                        { name: '兔子馒头', value: 29 },
+                        { name: '剁椒跑蛋', value: 21 },
+                        { name: '葱香烤茄子', value: 54 },
+                        { name: '拌洋葱', value: 27 },
+                        { name: '香葱煎蛋', value: 31 },
+                        { name: '葱油拌面', value: 37 },
+                        { name: '炒酸奶', value: 18 },
+                        { name: '浇汁菜心', value: 28 },
+                        { name: '菜饭', value: 33 },
+                        { name: '番茄炒蛋', value: 16 },
+                        { name: '葱油饼', value: 16 },
+                        { name: '野菜汤', value: 21 },
+                        { name: '雪菜蚕豆', value: 21 },
+                        { name: '鸡汤', value: 9 },
+                        { name: '青菜豆腐汤', value: 26 },
+                        { name: '面包', value: 8 },
+                        { name: '荷包蛋', value: 7 },
+                        { name: '糖番茄', value: 7 },
+                        { name: '炒青菜', value: 5 }
+                    ]
+                },
+                mounted() {
+                    this.r1_f = this.f_t;
+                    this.r2_f = this.f_t;
+                    this.r3_f = this.f_t;
+                    this.r4_f = this.f_t;
+                    this.r5_f = this.f_t;
+                    this.r6_f = this.f_t;
+                },
+                methods: {
+                    filterHandler(value, row, column) {
+                        const property = column['property'];
+                        if (value == 1) {
+                            return row[property] > 0;
+                        } else if (value == 0) {
+                            return row[property] == 0;
+                        } else if (value == -1) {
+                            return row[property] < 0;
+                        }
+                    },
+                    toTry () {
+                        let count = 0;
+                        this.tableData = [];
+                        for (let i of this.repices) {
+                            if (i != '') {
+                                count++;
+                            }
+                        }
+                        if (count < this.num || this.min == '' || this.max == '' || this.step == '' || this.result == '') {
+                            this.$message.warning('请填写配置！');
+                            console.log(count, this.num, this.min, this.max, this.step, this.result);
+                        } else {
+                            let repices = this.repices.map(item => {
+                                return {
+                                    name: item.split(',')[0],
+                                    value: parseInt(item.split(',')[1])
+                                }
+                            });
+                            if (this.num == 3) {
+                                this.three(
+                                    repices[0].value,
+                                    repices[0].name,
+                                    repices[1].value,
+                                    repices[1].name,
+                                    repices[2].value,
+                                    repices[2].name,
+                                    this.result
+                                );
+                            } else if (this.num == 4) {
+                                this.four(
+                                    repices[0].value,
+                                    repices[0].name,
+                                    repices[1].value,
+                                    repices[1].name,
+                                    repices[2].value,
+                                    repices[2].name,
+                                    repices[3].value,
+                                    repices[3].name,
+                                    repices[3].value,
+                                    repices[3].name,
+                                    this.result
+                                );
+                            } else if (this.num == 5) {
+                                this.five(
+                                    repices[0].value,
+                                    repices[0].name,
+                                    repices[1].value,
+                                    repices[1].name,
+                                    repices[2].value,
+                                    repices[2].name,
+                                    repices[3].value,
+                                    repices[3].name,
+                                    repices[4].value,
+                                    repices[4].name,
+                                    this.result
+                                );
+                            } else if (this.num == 6) {
+                                this.six(
+                                    repices[0].value,
+                                    repices[0].name,
+                                    repices[1].value,
+                                    repices[1].name,
+                                    repices[2].value,
+                                    repices[2].name,
+                                    repices[3].value,
+                                    repices[3].name,
+                                    repices[4].value,
+                                    repices[4].name,
+                                    repices[5].value,
+                                    repices[5].name,
+                                    this.result
+                                );
+                            }
+                        }
+                    },
+                    three(a, a_n, b, b_n, c, c_n, result) {
+                        let count = 0;
+                        let min = parseInt(this.min);
+                        let max = parseInt(this.max);
+                        let step = parseFloat(this.step);
+                        for (let i = min; i <= max; i += step) {
+                            for (let j = min; j <= max; j += step) {
+                                for (let k = min; k <= max; k += step) {
+                                    let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c);
+                                    if (x == result) {
+                                        count ++;
+                                        this.r1 = a_n;
+                                        this.r2 = b_n;
+                                        this.r3 = c_n;
+                                        this.tableData.push({ v1: i, v2: j, v3: k });
+                                    }
+                                    if (i == max && j == max && k == max) {
+                                        this.$message.success({
+                                            showClose: true,
+                                            message: `尝试完毕，共有${count}种结果`
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    four(a, a_n, b, b_n, c, c_n, d, d_n, result) {
+                        let count = 0;
+                        let min = parseInt(this.min);
+                        let max = parseInt(this.max);
+                        let step = parseFloat(this.step);
+                        for (let i = min; i <= max; i += step) {
+                            for (let j = min; j <= max; j += step) {
+                                for (let k = min; k <= max; k += step) {
+                                    for (let o = min; o <= max; o += step) {
+                                        let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d);
+                                        if (x == result) {
+                                            count ++;
+                                            this.r1 = a_n;
+                                            this.r2 = b_n;
+                                            this.r3 = c_n;
+                                            this.r4 = d_n;
+                                            this.tableData.push({ v1: i, v2: j, v3: k , v4: o});
+                                        }
+                                        if (i == max && j == max && k == max && o == max) {
+                                            this.$message.success({
+                                                showClose: true,
+                                                message: `尝试完毕，共有${count}种结果`
+                                            })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    five(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, result) {
+                        let count = 0;
+                        let min = parseInt(this.min);
+                        let max = parseInt(this.max);
+                        let step = parseFloat(this.step);
+                        for (let i = min; i <= max; i += step) {
+                            for (let j = min; j <= max; j += step) {
+                                for (let k = min; k <= max; k += step) {
+                                    for (let o = min; o <= max; o += step) {
+                                        for (let p = min; p <= max; p += step) {
+                                            let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d) + Math.ceil(p * e);
+                                            if (x == result) {
+                                                count ++;
+                                                this.r1 = a_n;
+                                                this.r2 = b_n;
+                                                this.r3 = c_n;
+                                                this.r4 = d_n;
+                                                this.r5 = e_n;
+                                                this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p});
+                                            }
+                                            if (i == max && j == max && k == max && o == max && p == max) {
+                                                this.$message.success({
+                                                    showClose: true,
+                                                    message: `尝试完毕，共有${count}种结果`
+                                                })
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    six(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, f, f_n, result) {
+                        let count = 0;
+                        let min = parseInt(this.min);
+                        let max = parseInt(this.max);
+                        let step = parseFloat(this.step);
+                        for (let i = min; i <= max; i += step) {
+                            for (let j = min; j <= max; j += step) {
+                                for (let k = min; k <= max; k += step) {
+                                    for (let o = min; o <= max; o += step) {
+                                        for (let p = min; p <= max; p += step) {
+                                            for (let q = min; q <= max; q += step) {
+                                                let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d) + Math.ceil(p * e) + Math.ceil(q * f);
+                                                    if (x == result) {
+                                                        count ++;
+                                                        this.r1 = a_n;
+                                                        this.r2 = b_n;
+                                                        this.r3 = c_n;
+                                                        this.r4 = d_n;
+                                                        this.r5 = e_n;
+                                                        this.r6 = f_n;
+                                                        this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q});
+                                                    }
+                                                    if (i == max && j == max && k == max && o == max && p == max && q == max) {
+                                                        this.$message.success({
+                                                            showClose: true,
+                                                            message: `尝试完毕，共有${count}种结果`
+                                                        })
+                                                    }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                watch: {
+                    num() {
+                        this.tableData = [];
+                        this.r1 = '菜谱1';
+                        this.r2 = '菜谱2';
+                        this.r3 = '菜谱3';
+                        this.r4 = '菜谱4';
+                        this.r5 = '菜谱5';
+                        this.r6 = '菜谱6';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
