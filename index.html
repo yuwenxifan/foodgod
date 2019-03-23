@@ -491,7 +491,10 @@
                         }
                         if (count < this.num || this.min == '' || this.max == '' || this.step == '' || this.result == '') {
                             this.$message.warning('请填写配置！');
-                            console.log(count, this.num, this.min, this.max, this.step, this.result);
+                        } else if (isNaN(parseInt(this.min)) || isNaN(parseInt(this.max)) || isNaN(parseFloat(this.step)) || isNaN(parseInt(this.result))) {
+                            this.$message.warning('最大值/最小值/步长/奖励分请填写数字');
+                        } else if (parseFloat(this.step) <= 0) {
+                            this.$message.warning('步长必须大于0');
                         } else {
                             let repices = this.repices.map(item => {
                                 return {
