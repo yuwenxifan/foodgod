@@ -9,11 +9,34 @@
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <title>厨神试菜辅助计算器</title>
     <style>
+        /*默认滚动条样式*/
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+            background-color: #F5F5F5;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #fff;
+        }
+        ::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            min-height: 30px;
+            border-radius: 6px;
+            border: 2px solid #fff;
+            margin: 5px;
+            background-color: #e0e0e0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cfcfcf;
+        }
         #main {
             display: flex;
         }
         .left {
             padding: 10px;
+            box-sizing: padding-box;
+            border-right: 1px #F2F6FC solid;
         }
         .right {
             padding: 10px;
@@ -23,12 +46,27 @@
             #main {
                 flex-wrap: wrap;
             }
+            .left {
+                border: none;
+            }
         }
-        .el-input__inner {
+        .input-text .el-input__inner {
             width: 210px;
+        }
+        .short-select .el-input__inner {
+            width: 150px;
+        }
+        .el-input-number--small {
+            width: 40px;
         }
         .el-tabs__item {
             padding: 0 15px;
+        }
+        .el-form-item__content {
+            display: flex;
+        }
+        div.text {
+            padding: 0 6px;
         }
     </style>
 </head>
@@ -38,13 +76,13 @@
         <div class="left">
             <el-form ref="form" label-width="80px" size="small">
                 <el-form-item label="最小倍数">
-                    <el-input v-model="min"></el-input>
+                    <el-input v-model="min" class="input-text"></el-input>
                 </el-form-item>
                 <el-form-item label="最大倍数">
-                    <el-input v-model="max"></el-input>
+                    <el-input v-model="max" class="input-text"></el-input>
                 </el-form-item>
                 <el-form-item label="步长">
-                    <el-input v-model="step"></el-input>
+                    <el-input v-model="step" class="input-text"></el-input>
                 </el-form-item>
             </el-form>
             <el-tabs v-model="num">
@@ -53,9 +91,9 @@
                 <el-tab-pane label="五道菜" :name="5"></el-tab-pane>
                 <el-tab-pane label="六道菜" :name="6"></el-tab-pane>
             </el-tabs>
-            <el-form ref="form" label-width="80px" size="small">
+            <el-form ref="form" label-width="65px" size="small">
                 <el-form-item v-for="(item, index) in num" :label="'第' + (index + 1) + '道菜'">
-                    <el-select v-model="repices[index]" placeholder="请选择菜谱" clearable filterable>
+                    <el-select v-model="repices[index]" placeholder="请选择菜谱" clearable filterable class="short-select">
                         <el-option
                             v-for="(r, i) in data"
                             :key="i"
@@ -63,9 +101,12 @@
                             :value="r.name + ',' + r.value">
                         </el-option>
                     </el-select>
+                    <div class="text">*</div>
+                    <el-input-number v-model="repices_c[index]" :controls="false" :min="1" :max="50" class="number"></el-input-number>
+                    <div class="text">份</div>
                 </el-form-item>
                 <el-form-item label="奖励分">
-                    <el-input v-model="result" style="width: 210px"></el-input>
+                    <el-input v-model="result" style="width: 210px" class="input-text"></el-input>
                 </el-form-item>
             </el-form>
             <el-button style="float: right" size="small" @click="toTry">计算</el-button>
@@ -90,10 +131,11 @@
                 el: '#main',
                 data: {
                     min: '-5',
-                    max: '4',
+                    max: '5',
                     step: '1',
                     num: 3,
                     repices: [],
+                    repices_c: [1, 1, 1, 1, 1, 1],
                     result: '0',
                     tableData: [],
                     r1: '菜谱1',
@@ -114,353 +156,353 @@
                     r5_f: [],
                     r6_f: [],
                     data: [
-                        { name: '九珍海鲜', value: 811 },
-                        { name: '咖喱鱼丸', value: 1153 },
-                        { name: '红蟳米糕', value: 1608 },
-                        { name: '酸辣笋尖粉', value: 198 },
-                        { name: '咖喱香辣虾', value: 1556 },
-                        { name: '鱼头豆腐汤', value: 616 },
-                        { name: '一颗赛艇', value: 1216 },
-                        { name: '腐衣黄鱼卷', value: 1193 },
-                        { name: '鱿鱼筒烤饭', value: 837 },
-                        { name: '雪笋蒸干贝', value: 1332 },
-                        { name: '松鼠桂鱼', value: 1639 },
-                        { name: '三文鱼茶泡饭', value: 1303 },
-                        { name: '迷之月饼', value: 270 },
-                        { name: '玲珑豆腐', value: 809 },
-                        { name: '蛤蜊豆腐汤', value: 402 },
-                        { name: '蛋白蟹肉', value: 1278 },
-                        { name: '天妇罗拼盘', value: 1270 },
-                        { name: '绿咖喱鸡肉卷', value: 1000 },
-                        { name: '香煎鸡胸肉', value: 975 },
-                        { name: '夏日风情堡', value: 962 },
-                        { name: '柴鱼豆腐', value: 957 },
-                        { name: '水煮鱼', value: 1148 },
-                        { name: '三杯鸡', value: 818 },
-                        { name: '绣球仙贝', value: 559 },
-                        { name: '冷锅鱼', value: 1852 },
-                        { name: '圣诞蛋糕', value: 225 },
-                        { name: '金缕虾', value: 899 },
-                        { name: '白雪金狗', value: 674 },
-                        { name: '圣诞烤鸡', value: 669 },
-                        { name: '圣诞沙拉', value: 222 },
-                        { name: '腊味合蒸', value: 1332 },
-                        { name: '干锅香辣虾', value: 874 },
-                        { name: '黑椒牛仔骨', value: 655 },
-                        { name: '虾仁跑蛋', value: 654 },
-                        { name: '汤圆', value: 434 },
-                        { name: '干锅鱼头', value: 866 },
-                        { name: '烤肉拼盘', value: 1032 },
-                        { name: '不难吃早餐', value: 516 },
-                        { name: '煎牛排', value: 1228 },
-                        { name: '抹茶火锅', value: 669 },
-                        { name: '蚵仔煎', value: 292 },
-                        { name: '杯子蛋糕', value: 584 },
-                        { name: '香辣蟹', value: 1154 },
-                        { name: '炸鸡咖喱蛋包饭', value: 565 },
-                        { name: '东坡肉', value: 752 },
-                        { name: '章鱼小丸子', value: 742 },
-                        { name: '酱爆鱿鱼', value: 882 },
-                        { name: '番茄虾仁盅', value: 273 },
-                        { name: '鸡汤煮干丝', value: 1080 },
-                        { name: '威灵顿牛排', value: 858 },
-                        { name: '糟四宝', value: 425 },
-                        { name: '牛肉火锅', value: 844 },
-                        { name: '抹茶白玉', value: 420 },
-                        { name: '红油抄手', value: 491 },
-                        { name: '腊味煲仔饭', value: 390 },
-                        { name: '孔雀迎宾', value: 1939 },
-                        { name: '油爆双脆', value: 645 },
-                        { name: '馕包肉', value: 378 },
-                        { name: '九转大肠', value: 940 },
-                        { name: '黄豆肥肠煲', value: 468 },
-                        { name: '牡丹燕菜', value: 623 },
-                        { name: '毛血旺', value: 614 },
-                        { name: '鸡肉火锅', value: 456 },
-                        { name: '小鱼锅贴', value: 362 },
-                        { name: '鸡肉蘑菇汤', value: 361 },
-                        { name: '柠檬鸡丝', value: 451 },
-                        { name: '豆豉蒸排骨', value: 721 },
-                        { name: '辣子鸡', value: 299 },
-                        { name: '葱姜辣炒蛤蜊', value: 298 },
-                        { name: '蛋酒', value: 143 },
-                        { name: '菠萝培根卷', value: 222 },
-                        { name: '富贵双方', value: 441 },
-                        { name: '京酱肉丝', value: 573 },
-                        { name: '猪肚鸡', value: 558 },
-                        { name: '咖喱土豆牛肉', value: 478 },
-                        { name: '豆豉蒸鱼', value: 417 },
-                        { name: '蒜泥白肉', value: 330 },
-                        { name: '酸菜鱼', value: 818 },
-                        { name: '恶作剧便当', value: 544 },
-                        { name: '串串锅', value: 538 },
-                        { name: '大骨高汤', value: 636 },
-                        { name: '咖喱土豆鸡', value: 524 },
-                        { name: '灯笼茄子', value: 520 },
-                        { name: '菠萝咕咾肉', value: 380 },
-                        { name: '黄豆小排汤', value: 505 },
-                        { name: '老婆饼', value: 188 },
-                        { name: '红酒鸭胸', value: 498 },
-                        { name: '粉丝蒸扇贝', value: 495 },
-                        { name: '牛肉手抓饭', value: 295 },
-                        { name: '竹筒饭', value: 590 },
-                        { name: '茄子猪肉卷', value: 294 },
-                        { name: '牙签肉', value: 242 },
-                        { name: '木乃伊香肠', value: 363 },
-                        { name: '牛肉披萨', value: 482 },
-                        { name: '芝麻八爪鱼', value: 178 },
-                        { name: '咸鱼', value: 176 },
-                        { name: '雪花鱼糕', value: 1614 },
-                        { name: '蟹黄鱼籽丸', value: 1365 },
-                        { name: '刺身拼盘', value: 1322 },
-                        { name: '芦笋鲜虾沙拉', value: 1039 },
-                        { name: '情人巧克力', value: 1193 },
-                        { name: '庆典蛋糕', value: 1681 },
-                        { name: '冰醉小龙虾', value: 955 },
-                        { name: '苦艾酒', value: 514 },
-                        { name: '姜饼屋', value: 826 },
-                        { name: '巧果', value: 408 },
-                        { name: '水晶肴蹄', value: 572 },
-                        { name: '邪神烤鸡', value: 2261 },
-                        { name: '卤水拼盘', value: 550 },
-                        { name: '特调饮品', value: 425 },
-                        { name: '日出鸡尾酒', value: 525 },
-                        { name: '南瓜鱼翅盅', value: 1968 },
-                        { name: '生拌牛肉', value: 486 },
-                        { name: '血腥玛丽', value: 641 },
-                        { name: '三色凉糕', value: 317 },
-                        { name: '雄黄酒', value: 316 },
-                        { name: '沙嗲拼盘', value: 1874 },
-                        { name: '青团', value: 306 },
-                        { name: '蟹黄鱼翅', value: 1804 },
-                        { name: '酸奶麦片', value: 437 },
-                        { name: '醉蟹', value: 567 },
-                        { name: '金鱼鸭掌', value: 1329 },
-                        { name: '肉蟹煲', value: 1584 },
-                        { name: '鱼跃龙门', value: 1746 },
-                        { name: '口水鸡', value: 373 },
-                        { name: '烟熏鲑鱼', value: 989 },
-                        { name: '鳝筒烧肉', value: 1439 },
-                        { name: '擂茶', value: 357 },
-                        { name: '幽灵咖喱', value: 1715 },
-                        { name: '夫妻肺片', value: 315 },
-                        { name: '风味凉皮', value: 314 },
-                        { name: '罗勒青酱面', value: 1253 },
-                        { name: '佛跳墙', value: 2482 },
-                        { name: '麻辣小龙虾', value: 1236 },
-                        { name: '味增汤', value: 970 },
-                        { name: '寿司', value: 296 },
-                        { name: '仰望星空', value: 1180 },
-                        { name: '孔雀开屏', value: 1533 },
-                        { name: '蒜蓉芝士焗龙虾', value: 2288 },
-                        { name: '虾仁豆腐', value: 758 },
-                        { name: '得莫利炖鱼', value: 1477 },
-                        { name: '咖喱蟹', value: 1447 },
-                        { name: '德式拼盘', value: 1720 },
-                        { name: '香煎银鳕鱼', value: 1430 },
-                        { name: '炒鳝糊', value: 1225 },
-                        { name: '龙井虾仁', value: 1705 },
-                        { name: '金钱发菜', value: 210 },
-                        { name: '虾片沙拉', value: 281 },
-                        { name: '蛤蜊蒸蛋', value: 276 },
-                        { name: '三色煎饼', value: 172 },
-                        { name: '毛蟹年糕', value: 457 },
-                        { name: '鸡肉南瓜焗饭', value: 386 },
-                        { name: '爱心宽油蛋', value: 538 },
-                        { name: '回锅肉', value: 336 },
-                        { name: '四喜饺', value: 216 },
-                        { name: '三鲜豆皮', value: 321 },
-                        { name: '萝卜小排汤', value: 255 },
-                        { name: '菠萝饭', value: 253 },
-                        { name: '宫保鸡丁', value: 316 },
-                        { name: '腌笃鲜', value: 834 },
-                        { name: '炸鱼排', value: 416 },
-                        { name: '酸汤肥牛', value: 356 },
-                        { name: '咖喱饺', value: 207 },
-                        { name: '关东煮', value: 206 },
-                        { name: '杏鲍菇牛肉粒', value: 399 },
-                        { name: '芝士猪肉卷', value: 395 },
-                        { name: '蟹粉豆腐', value: 237 },
-                        { name: '香煎萝卜糕', value: 294 },
-                        { name: '八宝饭', value: 191 },
-                        { name: '排骨年糕', value: 189 },
-                        { name: '串烤盐焗虾', value: 281 },
-                        { name: '黄焖鸡', value: 449 },
-                        { name: '南瓜粥', value: 318 },
-                        { name: '青椒塞肉', value: 271 },
-                        { name: '虾饺皇', value: 270 },
-                        { name: '辣条', value: 135 },
-                        { name: '撒尿牛丸', value: 357 },
-                        { name: '猪血豆腐串', value: 132 },
-                        { name: '洋葱肥肠', value: 176 },
-                        { name: '湘西外婆菜', value: 421 },
-                        { name: '狗粮', value: 174 },
-                        { name: '三丝抱豆', value: 172 },
-                        { name: '酸辣汤', value: 82 },
-                        { name: '金针菇牛肉卷', value: 340 },
-                        { name: '蟹粉狮子头', value: 667 },
-                        { name: '卤肉饭', value: 333 },
-                        { name: '扣三丝', value: 485 },
-                        { name: '客家小炒肉', value: 240 },
-                        { name: '元宝肘子', value: 237 },
-                        { name: '肉酱千层面', value: 235 },
-                        { name: '葱香烤鱼', value: 370 },
-                        { name: '辣白菜火锅', value: 368 },
-                        { name: '三鲜砂锅', value: 230 },
-                        { name: '蘸酱菜', value: 184 },
-                        { name: '老鸭粉丝汤', value: 183 },
-                        { name: '五谷丰登', value: 183 },
-                        { name: '爆炒猪肝', value: 181 },
-                        { name: '玫瑰花卷', value: 178 },
-                        { name: '糯米蛋', value: 177 },
-                        { name: '茶干', value: 147 },
-                        { name: '锅包肉', value: 350 },
-                        { name: '儿童餐', value: 350 },
-                        { name: '酸辣鸡杂', value: 145 },
-                        { name: '南瓜饼', value: 145 },
-                        { name: '猪血糕', value: 287 },
-                        { name: '元宝饺子', value: 172 },
-                        { name: '牛肉肠粉', value: 138 },
-                        { name: '迷你三明治', value: 66 },
-                        { name: '紫米双皮奶', value: 164 },
-                        { name: '猪耳碟头', value: 65 },
-                        { name: '南瓜紫薯挞', value: 135 },
-                        { name: '奶油甜酒', value: 161 },
-                        { name: '鸭肉皮蛋卷', value: 201 },
-                        { name: '红烧牛肉面', value: 159 },
-                        { name: '京葱鸡肉串', value: 132 },
-                        { name: '凤梨酥', value: 261 },
-                        { name: '红烧排骨', value: 260 },
-                        { name: '水晶桃花', value: 97 },
-                        { name: '糯米团子', value: 128 },
-                        { name: '红三剁', value: 126 },
-                        { name: '咖喱什锦蔬菜', value: 187 },
-                        { name: '桃花酒', value: 124 },
-                        { name: '海鲜面', value: 281 },
-                        { name: '鸡肉蔬菜沙拉', value: 175 },
-                        { name: '鱼香茄子', value: 175 },
-                        { name: '糖蒜', value: 138 },
-                        { name: '原汁白蛤蜊', value: 55 },
-                        { name: '洋葱小炒肉', value: 137 },
-                        { name: '芝士焗蘑菇', value: 114 },
-                        { name: '梅菜扣肉', value: 227 },
-                        { name: '酒酿小圆子', value: 85 },
-                        { name: '豆皮shou司', value: 54 },
-                        { name: '窝蛋牛肉粥', value: 84 },
-                        { name: '脆皮烧肉', value: 112 },
-                        { name: '地三鲜', value: 111 },
-                        { name: '香肠爱心蛋', value: 83 },
-                        { name: '笋干烧豆', value: 163 },
-                        { name: '片皮鸭', value: 319 },
-                        { name: '烤蔬菜沙拉', value: 127 },
-                        { name: '鱼香肉丝', value: 105 },
-                        { name: '两面黄', value: 102 },
-                        { name: '麻辣鸭头', value: 101 },
-                        { name: '豆腐奶茶', value: 75 },
-                        { name: '炸春卷', value: 149 },
-                        { name: '油焖笋', value: 238 },
-                        { name: '熊猫饭团', value: 198 },
-                        { name: '生滚鱼片粥', value: 73 },
-                        { name: '煎饼馃子', value: 73 },
-                        { name: '菠萝班戟', value: 194 },
-                        { name: '杭椒牛柳', value: 193 },
-                        { name: '家常豆腐', value: 189 },
-                        { name: '牛肉串', value: 92 },
-                        { name: '茄汁锅巴', value: 69 },
-                        { name: '罗宋汤', value: 157 },
-                        { name: '香酥鸭', value: 136 },
-                        { name: '肉夹馍', value: 108 },
-                        { name: '肉末茄子', value: 135 },
-                        { name: '腊肠', value: 43 },
-                        { name: '蚂蚁上树', value: 67 },
-                        { name: '卤水门腔', value: 87 },
-                        { name: '泡椒凤爪', value: 87 },
-                        { name: '土豆饼', value: 129 },
-                        { name: '酿黄瓜', value: 64 },
-                        { name: '荷花豆腐', value: 101 },
-                        { name: '辣白菜土豆片', value: 83 },
-                        { name: '巧芽汤', value: 61 },
-                        { name: '炒年糕', value: 61 },
-                        { name: '小笼包', value: 61 },
-                        { name: '蛋黄焗南瓜', value: 81 },
-                        { name: '鳗鱼炒饭', value: 190 },
-                        { name: '奶黄猪仔包', value: 59 },
-                        { name: '番茄芝士', value: 78 },
-                        { name: '辣炒萝卜干', value: 77 },
-                        { name: '豚骨拉面', value: 92 },
-                        { name: '香烤猪颈肉', value: 114 },
-                        { name: '辣肉面', value: 57 },
-                        { name: '牛肉卷饼', value: 113 },
-                        { name: '番茄肥牛', value: 89 },
-                        { name: '海鲜粥', value: 111 },
-                        { name: '冰激凌华夫饼', value: 110 },
-                        { name: '碳烤牛舌', value: 73 },
-                        { name: '手指饼干', value: 35 },
-                        { name: '温泉蛋', value: 35 },
-                        { name: '鸡清汤青拉面', value: 86 },
-                        { name: '烧麦', value: 107 },
-                        { name: '黄瓜炒肉', value: 142 },
-                        { name: '青椒土豆丝', value: 84 },
-                        { name: '泡菜炒饭', value: 104 },
-                        { name: '蛋黄粽', value: 83 },
-                        { name: '葱油鸡', value: 50 },
-                        { name: '肉末土豆泥', value: 78 },
-                        { name: '臭豆腐', value: 96 },
-                        { name: '蔬菜杯', value: 47 },
-                        { name: '红烧萝卜', value: 62 },
-                        { name: '牛肉煎包', value: 46 },
-                        { name: '青椒香干', value: 46 },
-                        { name: '干炒牛河', value: 90 },
-                        { name: '盐酥鸡', value: 60 },
-                        { name: '扬州炒饭', value: 70 },
-                        { name: '咸蛋肉饼', value: 43 },
-                        { name: '四季烤麸', value: 57 },
-                        { name: '猪排饭', value: 136 },
-                        { name: '番茄鸡蛋面', value: 64 },
-                        { name: '麻婆豆腐', value: 78 },
-                        { name: '蘑菇炒肉', value: 77 },
-                        { name: '薯条', value: 38 },
-                        { name: '黄瓜萝卜卷', value: 24 },
-                        { name: '炸茄盒', value: 59 },
-                        { name: '洋葱圈', value: 49 },
-                        { name: '牛奶鸡蛋布丁', value: 84 },
-                        { name: '椒盐排条', value: 47 },
-                        { name: '锅贴', value: 35 },
-                        { name: '皮蛋瘦肉粥', value: 35 },
-                        { name: '蛋包饭', value: 46 },
-                        { name: '椰丝牛奶', value: 33 },
-                        { name: '剁椒皮蛋', value: 30 },
-                        { name: '白粽', value: 30 },
-                        { name: '清炒黄豆芽', value: 39 },
-                        { name: '鸡蛋饼', value: 18 },
-                        { name: '腌茄子', value: 28 },
-                        { name: '炸牛奶', value: 56 },
-                        { name: '老虎菜', value: 27 },
-                        { name: '香菇青菜', value: 35 },
-                        { name: '菠萝派', value: 50 },
-                        { name: '豆腐青菜', value: 24 },
-                        { name: '白菜猪肉饺', value: 38 },
-                        { name: '凉拌黄瓜', value: 23 },
-                        { name: '阳春面', value: 30 },
-                        { name: '兔子馒头', value: 29 },
-                        { name: '剁椒跑蛋', value: 21 },
-                        { name: '葱香烤茄子', value: 54 },
-                        { name: '拌洋葱', value: 27 },
-                        { name: '香葱煎蛋', value: 31 },
-                        { name: '葱油拌面', value: 37 },
-                        { name: '炒酸奶', value: 18 },
-                        { name: '浇汁菜心', value: 28 },
-                        { name: '菜饭', value: 33 },
-                        { name: '番茄炒蛋', value: 16 },
-                        { name: '葱油饼', value: 16 },
-                        { name: '野菜汤', value: 21 },
-                        { name: '雪菜蚕豆', value: 21 },
-                        { name: '鸡汤', value: 9 },
-                        { name: '青菜豆腐汤', value: 26 },
-                        { name: '面包', value: 8 },
-                        { name: '荷包蛋', value: 7 },
-                        { name: '糖番茄', value: 7 },
-                        { name: '炒青菜', value: 5 }
+                        { id: 1, name: '荷包蛋', value: 7 },
+                        { id: 2, name: '鸡汤', value: 9 },
+                        { id: 3, name: '炒青菜', value: 5 },
+                        { id: 4, name: '香菇青菜', value: 35 },
+                        { id: 5, name: '地三鲜', value: 111 },
+                        { id: 6, name: '阳春面', value: 30 },
+                        { id: 7, name: '酱爆鱿鱼', value: 882 },
+                        { id: 8, name: '梅菜扣肉', value: 227 },
+                        { id: 9, name: '红烧牛肉面', value: 159 },
+                        { id: 10, name: '扬州炒饭', value: 70 },
+                        { id: 11, name: '鳗鱼炒饭', value: 190 },
+                        { id: 12, name: '咖喱土豆牛肉', value: 478 },
+                        { id: 13, name: '蛋包饭', value: 46 },
+                        { id: 14, name: '红烧排骨', value: 260 },
+                        { id: 15, name: '菜饭', value: 33 },
+                        { id: 16, name: '蟹粉狮子头', value: 667 },
+                        { id: 17, name: '番茄炒蛋', value: 16 },
+                        { id: 18, name: '麻婆豆腐', value: 78 },
+                        { id: 19, name: '豚骨拉面', value: 92 },
+                        { id: 20, name: '水煮鱼', value: 1148 },
+                        { id: 21, name: '番茄鸡蛋面', value: 64 },
+                        { id: 22, name: '回锅肉', value: 336 },
+                        { id: 23, name: '宫保鸡丁', value: 316 },
+                        { id: 24, name: '寿司', value: 296 },
+                        { id: 25, name: '鱼香肉丝', value: 105 },
+                        { id: 26, name: '白菜猪肉饺', value: 38 },
+                        { id: 27, name: '片皮鸭', value: 319 },
+                        { id: 28, name: '鸡蛋饼', value: 18 },
+                        { id: 29, name: '冰激凌华夫饼', value: 110 },
+                        { id: 30, name: '咖喱土豆鸡', value: 524 },
+                        { id: 31, name: '炸鱼排', value: 416 },
+                        { id: 32, name: '糯米团子', value: 128 },
+                        { id: 33, name: '葱油饼', value: 16 },
+                        { id: 34, name: '罗宋汤', value: 157 },
+                        { id: 35, name: '土豆饼', value: 129 },
+                        { id: 36, name: '小笼包', value: 61 },
+                        { id: 37, name: '蟹粉豆腐', value: 237 },
+                        { id: 38, name: '青椒土豆丝', value: 84 },
+                        { id: 39, name: '肉末茄子', value: 135 },
+                        { id: 40, name: '野菜汤', value: 21 },
+                        { id: 41, name: '蘑菇炒肉', value: 77 },
+                        { id: 42, name: '黄瓜炒肉', value: 142 },
+                        { id: 43, name: '菠萝派', value: 50 },
+                        { id: 44, name: '面包', value: 8 },
+                        { id: 45, name: '牛肉火锅', value: 844 },
+                        { id: 46, name: '猪排饭', value: 136 },
+                        { id: 47, name: '烤肉拼盘', value: 1032 },
+                        { id: 48, name: '蛋黄粽', value: 83 },
+                        { id: 49, name: '兔子馒头', value: 29 },
+                        { id: 50, name: '黄豆小排汤', value: 505 },
+                        { id: 51, name: '凉拌黄瓜', value: 23 },
+                        { id: 52, name: '大骨高汤', value: 636 },
+                        { id: 53, name: '咖喱饺', value: 207 },
+                        { id: 54, name: '烧麦', value: 107 },
+                        { id: 55, name: '锅贴', value: 35 },
+                        { id: 56, name: '虾饺皇', value: 270 },
+                        { id: 57, name: '海鲜面', value: 281 },
+                        { id: 58, name: '葱油拌面', value: 37 },
+                        { id: 59, name: '老鸭粉丝汤', value: 183 },
+                        { id: 60, name: '酸菜鱼', value: 818 },
+                        { id: 61, name: '杭椒牛柳', value: 193 },
+                        { id: 62, name: '干炒牛河', value: 90 },
+                        { id: 63, name: '撒尿牛丸', value: 357 },
+                        { id: 64, name: '泡椒凤爪', value: 87 },
+                        { id: 65, name: '葱油鸡', value: 50 },
+                        { id: 66, name: '黄焖鸡', value: 449 },
+                        { id: 67, name: '三杯鸡', value: 818 },
+                        { id: 68, name: '口水鸡', value: 373 },
+                        { id: 69, name: '皮蛋瘦肉粥', value: 35 },
+                        { id: 70, name: '窝蛋牛肉粥', value: 84 },
+                        { id: 71, name: '生滚鱼片粥', value: 73 },
+                        { id: 72, name: '海鲜粥', value: 111 },
+                        { id: 73, name: '油焖笋', value: 238 },
+                        { id: 74, name: '臭豆腐', value: 96 },
+                        { id: 75, name: '家常豆腐', value: 189 },
+                        { id: 76, name: '香辣蟹', value: 1154 },
+                        { id: 77, name: '毛蟹年糕', value: 457 },
+                        { id: 78, name: '醉蟹', value: 567 },
+                        { id: 79, name: '香酥鸭', value: 136 },
+                        { id: 80, name: '麻辣鸭头', value: 101 },
+                        { id: 81, name: '青菜豆腐汤', value: 26 },
+                        { id: 82, name: '卤水门腔', value: 87 },
+                        { id: 83, name: '猪耳碟头', value: 65 },
+                        { id: 84, name: '豆豉蒸鱼', value: 417 },
+                        { id: 85, name: '香烤猪颈肉', value: 114 },
+                        { id: 86, name: '猪肚鸡', value: 558 },
+                        { id: 87, name: '豆豉蒸排骨', value: 721 },
+                        { id: 88, name: '扣三丝', value: 485 },
+                        { id: 89, name: '佛跳墙', value: 2482 },
+                        { id: 90, name: '腌笃鲜', value: 834 },
+                        { id: 91, name: '剁椒跑蛋', value: 21 },
+                        { id: 92, name: '迷之月饼', value: 270 },
+                        { id: 93, name: '剁椒皮蛋', value: 30 },
+                        { id: 94, name: '葱香烤鱼', value: 370 },
+                        { id: 95, name: '菠萝班戟', value: 194 },
+                        { id: 96, name: '爆炒猪肝', value: 181 },
+                        { id: 97, name: '香葱煎蛋', value: 31 },
+                        { id: 98, name: '洋葱小炒肉', value: 137 },
+                        { id: 99, name: '洋葱圈', value: 49 },
+                        { id: 101, name: '洋葱肥肠', value: 176 },
+                        { id: 102, name: '干锅鱼头', value: 866 },
+                        { id: 103, name: '鸡肉蔬菜沙拉', value: 175 },
+                        { id: 104, name: '卤水拼盘', value: 550 },
+                        { id: 105, name: '干锅香辣虾', value: 874 },
+                        { id: 106, name: '牛肉煎包', value: 46 },
+                        { id: 107, name: '牛奶鸡蛋布丁', value: 84 },
+                        { id: 108, name: '炸牛奶', value: 56 },
+                        { id: 109, name: '番茄肥牛', value: 89 },
+                        { id: 110, name: '红油抄手', value: 491 },
+                        { id: 111, name: '煎牛排', value: 1228 },
+                        { id: 112, name: '四喜饺', value: 216 },
+                        { id: 113, name: '咖喱香辣虾', value: 1556 },
+                        { id: 115, name: '萝卜小排汤', value: 255 },
+                        { id: 116, name: '三鲜砂锅', value: 230 },
+                        { id: 117, name: '香煎银鳕鱼', value: 1430 },
+                        { id: 118, name: '辣炒萝卜干', value: 77 },
+                        { id: 119, name: '酿黄瓜', value: 64 },
+                        { id: 120, name: '雪笋蒸干贝', value: 1332 },
+                        { id: 121, name: '金缕虾', value: 899 },
+                        { id: 122, name: '虾仁跑蛋', value: 654 },
+                        { id: 123, name: '虾仁豆腐', value: 758 },
+                        { id: 124, name: '蛤蜊蒸蛋', value: 276 },
+                        { id: 125, name: '酒酿小圆子', value: 85 },
+                        { id: 126, name: '糯米蛋', value: 177 },
+                        { id: 127, name: '南瓜饼', value: 145 },
+                        { id: 128, name: '白粽', value: 30 },
+                        { id: 129, name: '京酱肉丝', value: 573 },
+                        { id: 130, name: '生拌牛肉', value: 486 },
+                        { id: 132, name: '得莫利炖鱼', value: 1477 },
+                        { id: 133, name: '东坡肉', value: 752 },
+                        { id: 134, name: '毛血旺', value: 614 },
+                        { id: 135, name: '杏鲍菇牛肉粒', value: 399 },
+                        { id: 136, name: '笋干烧豆', value: 163 },
+                        { id: 137, name: '水晶肴蹄', value: 572 },
+                        { id: 138, name: '鸡汤煮干丝', value: 1080 },
+                        { id: 139, name: '三鲜豆皮', value: 321 },
+                        { id: 140, name: '三丝抱豆', value: 172 },
+                        { id: 141, name: '龙井虾仁', value: 1705 },
+                        { id: 142, name: '冰醉小龙虾', value: 955 },
+                        { id: 143, name: '鱿鱼筒烤饭', value: 837 },
+                        { id: 144, name: '凤梨酥', value: 261 },
+                        { id: 145, name: '牛肉手抓饭', value: 295 },
+                        { id: 146, name: '锅包肉', value: 350 },
+                        { id: 147, name: '夫妻肺片', value: 315 },
+                        { id: 148, name: '九转大肠', value: 940 },
+                        { id: 149, name: '肉酱千层面', value: 235 },
+                        { id: 150, name: '蟹黄鱼翅', value: 1804 },
+                        { id: 151, name: '四季烤麸', value: 57 },
+                        { id: 152, name: '炸茄盒', value: 59 },
+                        { id: 153, name: '腊味合蒸', value: 1332 },
+                        { id: 154, name: '天妇罗拼盘', value: 1270 },
+                        { id: 155, name: '菠萝饭', value: 253 },
+                        { id: 156, name: '菠萝咕咾肉', value: 380 },
+                        { id: 157, name: '牛肉串', value: 92 },
+                        { id: 158, name: '碳烤牛舌', value: 73 },
+                        { id: 159, name: '红烧萝卜', value: 62 },
+                        { id: 160, name: '葱姜辣炒蛤蜊', value: 298 },
+                        { id: 161, name: '原汁白蛤蜊', value: 55 },
+                        { id: 162, name: '蛤蜊豆腐汤', value: 402 },
+                        { id: 163, name: '鱼头豆腐汤', value: 616 },
+                        { id: 164, name: '盐酥鸡', value: 60 },
+                        { id: 165, name: '椒盐排条', value: 47 },
+                        { id: 166, name: '糖番茄', value: 7 },
+                        { id: 167, name: '鱼香茄子', value: 175 },
+                        { id: 168, name: '葱香烤茄子', value: 54 },
+                        { id: 169, name: '串烤盐焗虾', value: 281 },
+                        { id: 170, name: '蒜蓉芝士焗龙虾', value: 2288 },
+                        { id: 171, name: '客家小炒肉', value: 240 },
+                        { id: 172, name: '肉夹馍', value: 108 },
+                        { id: 173, name: '金针菇牛肉卷', value: 340 },
+                        { id: 174, name: '牛肉肠粉', value: 138 },
+                        { id: 175, name: '牛肉卷饼', value: 113 },
+                        { id: 176, name: '鸭肉皮蛋卷', value: 201 },
+                        { id: 178, name: '章鱼小丸子', value: 742 },
+                        { id: 179, name: '松鼠桂鱼', value: 1639 },
+                        { id: 180, name: '粉丝蒸扇贝', value: 495 },
+                        { id: 181, name: '油爆双脆', value: 645 },
+                        { id: 182, name: '竹筒饭', value: 590 },
+                        { id: 183, name: '炸春卷', value: 149 },
+                        { id: 184, name: '元宝肘子', value: 237 },
+                        { id: 185, name: '鸡清汤青拉面', value: 86 },
+                        { id: 186, name: '紫米双皮奶', value: 164 },
+                        { id: 187, name: '肉末土豆泥', value: 78 },
+                        { id: 188, name: '咖喱什锦蔬菜', value: 187 },
+                        { id: 189, name: '咖喱鱼丸', value: 1153 },
+                        { id: 190, name: '咖喱蟹', value: 1447 },
+                        { id: 191, name: '番茄芝士', value: 78 },
+                        { id: 192, name: '五谷丰登', value: 183 },
+                        { id: 193, name: '酸汤肥牛', value: 356 },
+                        { id: 194, name: '麻辣小龙虾', value: 1236 },
+                        { id: 195, name: '狗粮', value: 174 },
+                        { id: 196, name: '牛肉披萨', value: 482 },
+                        { id: 197, name: '圣诞烤鸡', value: 669 },
+                        { id: 198, name: '圣诞沙拉', value: 222 },
+                        { id: 199, name: '圣诞蛋糕', value: 225 },
+                        { id: 200, name: '仰望星空', value: 1180 },
+                        { id: 201, name: '串串锅', value: 538 },
+                        { id: 202, name: '鸡肉蘑菇汤', value: 361 },
+                        { id: 203, name: '青椒塞肉', value: 271 },
+                        { id: 204, name: '湘西外婆菜', value: 421 },
+                        { id: 205, name: '熊猫饭团', value: 198 },
+                        { id: 206, name: '卤肉饭', value: 333 },
+                        { id: 207, name: '风味凉皮', value: 314 },
+                        { id: 208, name: '芦笋鲜虾沙拉', value: 1039 },
+                        { id: 209, name: '辣白菜火锅', value: 368 },
+                        { id: 210, name: '茄汁锅巴', value: 69 },
+                        { id: 211, name: '香煎萝卜糕', value: 294 },
+                        { id: 212, name: '猪血糕', value: 287 },
+                        { id: 213, name: '儿童餐', value: 350 },
+                        { id: 214, name: '芝士猪肉卷', value: 395 },
+                        { id: 215, name: '柴鱼豆腐', value: 957 },
+                        { id: 216, name: '雪花鱼糕', value: 1614 },
+                        { id: 217, name: '糟四宝', value: 425 },
+                        { id: 219, name: '荷花豆腐', value: 101 },
+                        { id: 220, name: '味增汤', value: 970 },
+                        { id: 221, name: '泡菜炒饭', value: 104 },
+                        { id: 222, name: '蚵仔煎', value: 292 },
+                        { id: 223, name: '三色煎饼', value: 172 },
+                        { id: 224, name: '茄子猪肉卷', value: 294 },
+                        { id: 225, name: '三色凉糕', value: 317 },
+                        { id: 227, name: '炸鸡咖喱蛋包饭', value: 565 },
+                        { id: 229, name: '鸡肉火锅', value: 456 },
+                        { id: 230, name: '黑椒牛仔骨', value: 655 },
+                        { id: 231, name: '红酒鸭胸', value: 498 },
+                        { id: 232, name: '蛋白蟹肉', value: 1278 },
+                        { id: 233, name: '一颗赛艇', value: 1216 },
+                        { id: 235, name: '绿咖喱鸡肉卷', value: 1000 },
+                        { id: 236, name: '老虎菜', value: 27 },
+                        { id: 237, name: '酸辣汤', value: 82 },
+                        { id: 238, name: '温泉蛋', value: 35 },
+                        { id: 239, name: '八宝饭', value: 191 },
+                        { id: 240, name: '番茄虾仁盅', value: 273 },
+                        { id: 241, name: '黄瓜萝卜卷', value: 24 },
+                        { id: 242, name: '豆腐青菜', value: 24 },
+                        { id: 243, name: '青椒香干', value: 46 },
+                        { id: 244, name: '腊肠', value: 43 },
+                        { id: 245, name: '雪菜蚕豆', value: 21 },
+                        { id: 246, name: '腌茄子', value: 28 },
+                        { id: 247, name: '椰丝牛奶', value: 33 },
+                        { id: 248, name: '香肠爱心蛋', value: 83 },
+                        { id: 249, name: '白雪金狗', value: 674 },
+                        { id: 250, name: '玫瑰花卷', value: 178 },
+                        { id: 251, name: '情人巧克力', value: 1193 },
+                        { id: 252, name: '金钱发菜', value: 210 },
+                        { id: 253, name: '孔雀开屏', value: 1533 },
+                        { id: 254, name: '汤圆', value: 434 },
+                        { id: 255, name: '芝士焗蘑菇', value: 114 },
+                        { id: 256, name: '咸鱼', value: 176 },
+                        { id: 257, name: '酸辣笋尖粉', value: 198 },
+                        { id: 258, name: '辣子鸡', value: 299 },
+                        { id: 259, name: '腊味煲仔饭', value: 390 },
+                        { id: 260, name: '京葱鸡肉串', value: 132 },
+                        { id: 261, name: '关东煮', value: 206 },
+                        { id: 262, name: '菠萝培根卷', value: 222 },
+                        { id: 263, name: '蟹黄鱼籽丸', value: 1365 },
+                        { id: 264, name: '金鱼鸭掌', value: 1329 },
+                        { id: 265, name: '水晶桃花', value: 97 },
+                        { id: 266, name: '青团', value: 306 },
+                        { id: 267, name: '桃花酒', value: 124 },
+                        { id: 268, name: '刺身拼盘', value: 1322 },
+                        { id: 269, name: '蘸酱菜', value: 184 },
+                        { id: 270, name: '雄黄酒', value: 316 },
+                        { id: 271, name: '咸蛋肉饼', value: 43 },
+                        { id: 272, name: '炒鳝糊', value: 1225 },
+                        { id: 273, name: '腐衣黄鱼卷', value: 1193 },
+                        { id: 274, name: '绣球仙贝', value: 559 },
+                        { id: 275, name: '薯条', value: 38 },
+                        { id: 276, name: '煎饼馃子', value: 73 },
+                        { id: 277, name: '炒酸奶', value: 18 },
+                        { id: 278, name: '辣白菜土豆片', value: 83 },
+                        { id: 279, name: '奶黄猪仔包', value: 59 },
+                        { id: 280, name: '排骨年糕', value: 189 },
+                        { id: 281, name: '鳝筒烧肉', value: 1439 },
+                        { id: 282, name: '肉蟹煲', value: 1584 },
+                        { id: 283, name: '日出鸡尾酒', value: 525 },
+                        { id: 284, name: '奶油甜酒', value: 161 },
+                        { id: 286, name: '豆腐奶茶', value: 75 },
+                        { id: 288, name: '黄豆肥肠煲', value: 468 },
+                        { id: 290, name: '血腥玛丽', value: 641 },
+                        { id: 291, name: '蒜泥白肉', value: 330 },
+                        { id: 292, name: '蚂蚁上树', value: 67 },
+                        { id: 293, name: '两面黄', value: 102 },
+                        { id: 294, name: '孔雀迎宾', value: 1939 },
+                        { id: 295, name: '浇汁菜心', value: 28 },
+                        { id: 296, name: '手指饼干', value: 35 },
+                        { id: 297, name: '豆皮shou司', value: 54 },
+                        { id: 299, name: '德式拼盘', value: 1720 },
+                        { id: 300, name: '夏日风情堡', value: 962 },
+                        { id: 301, name: '虾片沙拉', value: 281 },
+                        { id: 302, name: '清炒黄豆芽', value: 39 },
+                        { id: 303, name: '南瓜粥', value: 318 },
+                        { id: 305, name: '鸡肉南瓜焗饭', value: 386 },
+                        { id: 306, name: '三文鱼茶泡饭', value: 1303 },
+                        { id: 308, name: '擂茶', value: 357 },
+                        { id: 309, name: '茶干', value: 147 },
+                        { id: 310, name: '抹茶白玉', value: 420 },
+                        { id: 311, name: '猪血豆腐串', value: 132 },
+                        { id: 312, name: '香煎鸡胸肉', value: 975 },
+                        { id: 313, name: '巧芽汤', value: 61 },
+                        { id: 314, name: '巧果', value: 408 },
+                        { id: 316, name: '脆皮烧肉', value: 112 },
+                        { id: 317, name: '拌洋葱', value: 27 },
+                        { id: 318, name: '小鱼锅贴', value: 362 },
+                        { id: 321, name: '沙嗲拼盘', value: 1874 },
+                        { id: 322, name: '庆典蛋糕', value: 1681 },
+                        { id: 324, name: '芝麻八爪鱼', value: 178 },
+                        { id: 325, name: '酸辣鸡杂', value: 145 },
+                        { id: 327, name: '馕包肉', value: 378 },
+                        { id: 329, name: '烤蔬菜沙拉', value: 127 },
+                        { id: 330, name: '蛋黄焗南瓜', value: 81 },
+                        { id: 332, name: '牙签肉', value: 242 },
+                        { id: 333, name: '辣肉面', value: 57 },
+                        { id: 334, name: '酸奶麦片', value: 437 },
+                        { id: 335, name: '九珍海鲜', value: 811 },
+                        { id: 337, name: '抹茶火锅', value: 669 },
+                        { id: 338, name: '恶作剧便当', value: 544 },
+                        { id: 339, name: '杯子蛋糕', value: 584 },
+                        { id: 340, name: '幽灵咖喱', value: 1715 },
+                        { id: 341, name: '邪神烤鸡', value: 2261 },
+                        { id: 342, name: '木乃伊香肠', value: 363 },
+                        { id: 343, name: '炒年糕', value: 61 },
+                        { id: 347, name: '苦艾酒', value: 514 },
+                        { id: 348, name: '特调饮品', value: 425 },
+                        { id: 349, name: '辣条', value: 135 },
+                        { id: 350, name: '南瓜鱼翅盅', value: 1968 },
+                        { id: 353, name: '红三剁', value: 126 },
+                        { id: 358, name: '柠檬鸡丝', value: 451 },
+                        { id: 361, name: '富贵双方', value: 441 },
+                        { id: 362, name: '爱心宽油蛋', value: 538 },
+                        { id: 363, name: '冷锅鱼', value: 1852 },
+                        { id: 364, name: '罗勒青酱面', value: 1253 },
+                        { id: 365, name: '南瓜紫薯挞', value: 135 },
+                        { id: 366, name: '蛋酒', value: 143 },
+                        { id: 367, name: '不难吃早餐', value: 516 },
+                        { id: 368, name: '蔬菜杯', value: 47 },
+                        { id: 369, name: '烟熏鲑鱼', value: 989 },
+                        { id: 370, name: '姜饼屋', value: 826 },
+                        { id: 371, name: '威灵顿牛排', value: 858 },
+                        { id: 372, name: '迷你三明治', value: 66 },
+                        { id: 373, name: '老婆饼', value: 188 },
+                        { id: 376, name: '元宝饺子', value: 172 },
+                        { id: 377, name: '玲珑豆腐', value: 809 },
+                        { id: 378, name: '糖蒜', value: 138 },
+                        { id: 382, name: '红蟳米糕', value: 1608 },
+                        { id: 385, name: '灯笼茄子', value: 520 },
+                        { id: 387, name: '鱼跃龙门', value: 1746 },
+                        { id: 389, name: '牡丹燕菜', value: 623 }
                     ]
                 },
                 mounted() {
@@ -523,8 +565,6 @@
                                     repices[2].name,
                                     repices[3].value,
                                     repices[3].name,
-                                    repices[3].value,
-                                    repices[3].name,
                                     this.result
                                 );
                             } else if (this.num == 5) {
@@ -565,10 +605,13 @@
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
+                        let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
+                        let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
+                        let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
-                                    let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c);
+                                    let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3;
                                     if (x == result) {
                                         count ++;
                                         this.r1 = a_n;
@@ -591,11 +634,15 @@
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
+                        let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
+                        let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
+                        let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
+                        let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
-                                        let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d);
+                                        let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4;
                                         if (x == result) {
                                             count ++;
                                             this.r1 = a_n;
@@ -620,12 +667,17 @@
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
+                        let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
+                        let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
+                        let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
+                        let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
+                        let c_5 = this.repices_c[4] ? this.repices_c[4] : 1;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
                                         for (let p = min; p <= max; p += step) {
-                                            let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d) + Math.ceil(p * e);
+                                            let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5;
                                             if (x == result) {
                                                 count ++;
                                                 this.r1 = a_n;
@@ -652,13 +704,19 @@
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
+                        let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
+                        let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
+                        let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
+                        let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
+                        let c_5 = this.repices_c[4] ? this.repices_c[4] : 1;
+                        let c_6 = this.repices_c[5] ? this.repices_c[5] : 1;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
                                         for (let p = min; p <= max; p += step) {
                                             for (let q = min; q <= max; q += step) {
-                                                let x = Math.ceil(i * a) + Math.ceil(j * b) + Math.ceil(k * c) + Math.ceil(o * d) + Math.ceil(p * e) + Math.ceil(q * f);
+                                                let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5 + Math.ceil(q * f) * c_6;
                                                     if (x == result) {
                                                         count ++;
                                                         this.r1 = a_n;
