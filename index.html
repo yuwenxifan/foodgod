@@ -88,6 +88,9 @@
                 <el-form-item label="步长">
                     <el-input v-model="step" class="input-text"></el-input>
                 </el-form-item>
+                <el-form-item label="容差">
+                    <el-input-number v-model="tolerance" class="input-text" :min="0" :max="10" :controls="false"></el-input-number>
+                </el-form-item>
             </el-form>
             <el-tabs v-model="num">
                 <el-tab-pane label="三道菜" :name="3"></el-tab-pane>
@@ -123,6 +126,8 @@
                 <el-table-column :filters='r4_f' :filter-method="filterHandler" prop="v4" :label="r4" v-if="num >= 4"></el-table-column>
                 <el-table-column :filters='r5_f' :filter-method="filterHandler" prop="v5" :label="r5" v-if="num >= 5"></el-table-column>
                 <el-table-column :filters='r6_f' :filter-method="filterHandler" prop="v6" :label="r6" v-if="num >= 6"></el-table-column>
+                <el-table-column prop="score" label="奖励分" v-if="tolerance > 0"></el-table-column>
+                <el-table-column prop="error" label="误差" v-if="tolerance > 0"></el-table-column>
             </el-table>
         </div>
     </div>
@@ -138,6 +143,7 @@
                     height: window.innerHeight - 60,
                     max: '5',
                     step: '1',
+                    tolerance: 0,
                     num: 3,
                     repices: [],
                     repices_c: [1, 1, 1, 1, 1, 1],
@@ -531,6 +537,7 @@
                     },
                     toTry () {
                         let count = 0;
+                        let tolerance = this.tolerance || 0;
                         this.tableData = [];
                         for (let i of this.repices) {
                             if (i != '') {
@@ -607,6 +614,7 @@
                     },
                     three(a, a_n, b, b_n, c, c_n, result) {
                         let count = 0;
+                        let tolerance = this.tolerance || 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -617,12 +625,12 @@
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3;
-                                    if (x == result) {
+                                    if (Math.abs(x - result) <= tolerance) {
                                         count ++;
                                         this.r1 = a_n;
                                         this.r2 = b_n;
                                         this.r3 = c_n;
-                                        this.tableData.push({ v1: i, v2: j, v3: k });
+                                        this.tableData.push({ v1: i, v2: j, v3: k, score: x, error: x - result });
                                     }
                                     if (i == max && j == max && k == max) {
                                         this.$message.success({
@@ -636,6 +644,7 @@
                     },
                     four(a, a_n, b, b_n, c, c_n, d, d_n, result) {
                         let count = 0;
+                        let tolerance = this.tolerance || 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -648,13 +657,13 @@
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
                                         let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4;
-                                        if (x == result) {
+                                        if (Math.abs(x - result) <= tolerance) {
                                             count ++;
                                             this.r1 = a_n;
                                             this.r2 = b_n;
                                             this.r3 = c_n;
                                             this.r4 = d_n;
-                                            this.tableData.push({ v1: i, v2: j, v3: k , v4: o});
+                                            this.tableData.push({ v1: i, v2: j, v3: k , v4: o, score: x, error: x - result});
                                         }
                                         if (i == max && j == max && k == max && o == max) {
                                             this.$message.success({
@@ -669,6 +678,7 @@
                     },
                     five(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, result) {
                         let count = 0;
+                        let tolerance = this.tolerance || 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -683,14 +693,14 @@
                                     for (let o = min; o <= max; o += step) {
                                         for (let p = min; p <= max; p += step) {
                                             let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5;
-                                            if (x == result) {
+                                            if (Math.abs(x - result) <= tolerance) {
                                                 count ++;
                                                 this.r1 = a_n;
                                                 this.r2 = b_n;
                                                 this.r3 = c_n;
                                                 this.r4 = d_n;
                                                 this.r5 = e_n;
-                                                this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p});
+                                                this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, score: x, error: x - result});
                                             }
                                             if (i == max && j == max && k == max && o == max && p == max) {
                                                 this.$message.success({
@@ -706,6 +716,7 @@
                     },
                     six(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, f, f_n, result) {
                         let count = 0;
+                        let tolerance = this.tolerance || 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -722,7 +733,7 @@
                                         for (let p = min; p <= max; p += step) {
                                             for (let q = min; q <= max; q += step) {
                                                 let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5 + Math.ceil(q * f) * c_6;
-                                                    if (x == result) {
+                                                    if (Math.abs(x - result) <= tolerance) {
                                                         count ++;
                                                         this.r1 = a_n;
                                                         this.r2 = b_n;
@@ -730,7 +741,7 @@
                                                         this.r4 = d_n;
                                                         this.r5 = e_n;
                                                         this.r6 = f_n;
-                                                        this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q});
+                                                        this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q, score: x, error: x - result});
                                                     }
                                                     if (i == max && j == max && k == max && o == max && p == max && q == max) {
                                                         this.$message.success({
