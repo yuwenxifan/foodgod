@@ -72,11 +72,14 @@
             padding-left: 7px;
             padding-right: 7px;
         }
+        #main.hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <div id="main">
+    <div id="main" class="hidden">
         <div class="left">
             <el-form ref="form" label-width="80px" size="small">
                 <el-form-item label="最小倍数">
@@ -89,7 +92,7 @@
                     <el-input v-model="step" class="input-text"></el-input>
                 </el-form-item>
                 <el-form-item label="容差">
-                    <el-input-number v-model="tolerance" class="input-text" :min="0" :max="10" :controls="false"></el-input-number>
+                    <el-input-number v-model="tolerance" class="input-text" :min="0" :max="30" :controls="false"></el-input-number>
                 </el-form-item>
             </el-form>
             <el-tabs v-model="num">
@@ -135,10 +138,11 @@
     <script type="text/javascript" src="./js/vue.min.js"></script>
     <script src="./ele/index.js"></script>
     <script>
-        $(function () {
+        $(function() {
             var app = new Vue({
                 el: '#main',
                 data: {
+                    loading: true,
                     min: '-5',
                     height: window.innerHeight - 60,
                     max: '5',
@@ -523,6 +527,9 @@
                     this.r4_f = this.f_t;
                     this.r5_f = this.f_t;
                     this.r6_f = this.f_t;
+                    $(document).ready(() => {
+                        $(main).removeClass('hidden');
+                    });
                 },
                 methods: {
                     filterHandler(value, row, column) {
