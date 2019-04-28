@@ -75,12 +75,28 @@
         #main.hidden {
             display: none;
         }
+        .el-dialog__body {
+            padding: 10px 20px 20px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .el-dialog__body p, .el-dialog__body h3 {
+            margin: 10px 0;
+        }
+        .bold {
+            font-weight: 600;
+        }
     </style>
 </head>
 
 <body>
     <div id="main" class="hidden">
         <div class="left">
+            <div style="overflow: hidden; padding-right: 10px;">
+                <el-button type="text" size="small" style="float: right;" @click="dialogVisible = true">
+                    <i class="el-icon-info"></i> 说明
+                </el-button>
+            </div>
             <el-form ref="form" label-width="80px" size="small">
                 <el-form-item label="最小倍数">
                     <el-input v-model="min" class="input-text"></el-input>
@@ -133,6 +149,33 @@
                 <el-table-column prop="error" label="误差" v-if="tolerance > 0"></el-table-column>
             </el-table>
         </div>
+        <el-dialog title="说明" :visible.sync="dialogVisible" :width="dialogWidth">
+            <div class="message">
+                <p style="font-size: 15px;">
+                    本网页为爆炒江湖厨神试菜组试菜所设计，用于辅助快速确定菜谱倍数。<br/>
+                    我们的目标是：有朝一日能够有钱到一道一道试菜，去tm的计算器！
+                </p>
+                <h3>基本用法</h3>
+                <p>选定最小倍数和最大倍数和步长（填1是整数倍，填0.5就支持x.5倍），选择菜谱，份数，填入试菜所得奖励分点击计算，会在右侧表格中展示出所有可能的菜谱倍数，计算倍数支持筛选，菜谱选择框可以输入关键字搜索（这个在手机上好像不大好用，真是令人头秃）</p>
+                <h3>关于容差</h3>
+                <p>
+                    本网站的奖励分计算方法是：<br/>
+                    奖励分 = <span class="bold">向上取整(单价*倍数)*份数</span>，
+                </p>
+                <p>
+                    而游戏里的奖励分计算方式是：<br/>
+                    实际得分 = <span class="bold">向上取整(单价*(1+其余加成+倍数))*份数</span><br/>
+                    原始得分 = <span class="bold">向上取整(单价*(1+其余加成))*份数</span><br/>
+                    <span class="bold">奖励分 = 实际得分 - 原始得分</span><br/>
+                </p>
+                <p>
+                    显然，当奖励倍数为整数倍时，两种算法得出的结果是一样的；而当奖励倍数存在小数点时，品级/技能/厨具/修炼的影响<span class="bold">可能</span>会导致两种算法的结果存在一份菜谱一分的误差。所以设置了一个容差值，可以将奖励分±容差范围内的倍数结果也显示出来以供参考。容差值可选范围0~30
+                </p>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
     <script src="./js/jquery-2.1.4.min.js"></script>
     <script type="text/javascript" src="./js/vue.min.js"></script>
@@ -142,7 +185,8 @@
             var app = new Vue({
                 el: '#main',
                 data: {
-                    loading: true,
+                    dialogWidth: '90%',
+                    dialogVisible: false,
                     min: '-5',
                     height: window.innerHeight - 60,
                     max: '5',
@@ -530,6 +574,9 @@
                     $(document).ready(() => {
                         $(main).removeClass('hidden');
                     });
+                    if (window.innerWidth > 1000) {
+                        this.dialogWidth = '950px';
+                    }
                 },
                 methods: {
                     filterHandler(value, row, column) {
