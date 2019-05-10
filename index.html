@@ -169,7 +169,7 @@
                     <span class="bold">奖励分 = 实际得分 - 原始得分</span><br/>
                 </p>
                 <p>
-                    显然，当奖励倍数为整数倍时，两种算法得出的结果是一样的；而当奖励倍数存在小数点时，品级/技能/厨具/修炼的影响<span class="bold">可能</span>会导致两种算法的结果存在一份菜谱一分的误差。所以设置了一个容差值，可以将奖励分±容差范围内的倍数结果也显示出来以供参考。容差值可选范围0~30
+                    显然，当奖励倍数为整数倍时，两种算法得出的结果是一样的；而当奖励倍数存在小数点时，品级/技能/厨具/修炼的影响<span class="bold">可能</span>会导致两种算法的结果存在一份菜谱一分的误差（游戏里显示的会比算出来的少一分）。所以设置了一个容差值，可以将奖励分+容差范围内的倍数结果也显示出来以供参考。容差值可选范围0~30
                 </p>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -692,7 +692,7 @@
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3;
-                                    if (Math.abs(x - result) <= tolerance) {
+                                    if (x >= result && (x - result) <= tolerance) {
                                         count ++;
                                         this.r1 = a_n;
                                         this.r2 = b_n;
@@ -724,7 +724,7 @@
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
                                         let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4;
-                                        if (Math.abs(x - result) <= tolerance) {
+                                        if (x >= result && (x - result) <= tolerance) {
                                             count ++;
                                             this.r1 = a_n;
                                             this.r2 = b_n;
@@ -760,7 +760,7 @@
                                     for (let o = min; o <= max; o += step) {
                                         for (let p = min; p <= max; p += step) {
                                             let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5;
-                                            if (Math.abs(x - result) <= tolerance) {
+                                            if (x >= result && (x - result) <= tolerance) {
                                                 count ++;
                                                 this.r1 = a_n;
                                                 this.r2 = b_n;
@@ -800,7 +800,7 @@
                                         for (let p = min; p <= max; p += step) {
                                             for (let q = min; q <= max; q += step) {
                                                 let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5 + Math.ceil(q * f) * c_6;
-                                                    if (Math.abs(x - result) <= tolerance) {
+                                                    if (x >= result && (x - result) <= tolerance) {
                                                         count ++;
                                                         this.r1 = a_n;
                                                         this.r2 = b_n;
