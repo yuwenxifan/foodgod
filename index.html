@@ -719,7 +719,7 @@
                         this.r6_f = this.setFilter(this.tableData, 'v6');
                     },
                     setFilter(data, key) {
-                        if (data.length > 0 && data[0][key]) {
+                        if (data.length > 0 && (data[0][key] || data[0][key] == 0)) {
                             let arr = data.map(item => {
                                 return item[key]
                             });
