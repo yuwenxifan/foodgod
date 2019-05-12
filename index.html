@@ -65,6 +65,9 @@
         .el-form-item__content {
             display: flex;
         }
+        .swith .el-form-item__content {
+            display: block;
+        }
         div.text {
             padding: 0 6px;
         }
@@ -107,8 +110,8 @@
                 <el-form-item label="步长">
                     <el-input v-model="step" class="input-text"></el-input>
                 </el-form-item>
-                <el-form-item label="容差">
-                    <el-input-number v-model="tolerance" class="input-text" :min="0" :max="30" :controls="false"></el-input-number>
+                <el-form-item label="容差" class="swith">
+                    <el-switch v-model="tolerance"></el-switch>
                 </el-form-item>
             </el-form>
             <el-tabs v-model="num">
@@ -145,8 +148,8 @@
                 <el-table-column :filters='r4_f' :filter-method="filterHandler" prop="v4" :label="r4" v-if="num >= 4"></el-table-column>
                 <el-table-column :filters='r5_f' :filter-method="filterHandler" prop="v5" :label="r5" v-if="num >= 5"></el-table-column>
                 <el-table-column :filters='r6_f' :filter-method="filterHandler" prop="v6" :label="r6" v-if="num >= 6"></el-table-column>
-                <el-table-column prop="score" label="奖励分" v-if="tolerance > 0"></el-table-column>
-                <el-table-column prop="error" label="误差" v-if="tolerance > 0"></el-table-column>
+                <el-table-column prop="score" label="奖励分" v-if="Math.ceil(step) != step && tolerance"></el-table-column>
+                <el-table-column prop="error" label="误差" v-if="Math.ceil(step) != step && tolerance"></el-table-column>
             </el-table>
         </div>
         <el-dialog title="说明" :visible.sync="dialogVisible" :width="dialogWidth">
@@ -156,7 +159,7 @@
                     我们的目标是：有朝一日能够有钱到一道一道试菜，去tm的计算器！
                 </p>
                 <h3>基本用法</h3>
-                <p>选定最小倍数和最大倍数和步长（填1是整数倍，填0.5就支持x.5倍），选择菜谱，份数，填入试菜所得奖励分点击计算，会在右侧表格中展示出所有可能的菜谱倍数，计算倍数支持筛选，菜谱选择框可以输入关键字搜索（这个在手机上好像不大好用，真是令人头秃）</p>
+                <p>选定最小倍数和最大倍数和步长（填1是整数倍，填0.5就支持x.5倍），选择菜谱，份数，填入试菜所得奖励分点击计算，会在右侧表格中展示出所有可能的菜谱倍数，计算倍数支持筛选（应垃圾鱼摆摆要求改为按具体倍数筛选），菜谱选择框可以输入关键字搜索（这个在手机上好像不大好用，真是令人头秃）</p>
                 <h3>关于容差</h3>
                 <p>
                     本网站的奖励分计算方法是：<br/>
@@ -169,7 +172,7 @@
                     <span class="bold">奖励分 = 实际得分 - 原始得分</span><br/>
                 </p>
                 <p>
-                    显然，当奖励倍数为整数倍时，两种算法得出的结果是一样的；而当奖励倍数存在小数点时，品级/技能/厨具/修炼的影响<span class="bold">可能</span>会导致两种算法的结果存在一份菜谱一分的误差（游戏里显示的会比算出来的少一分）。所以设置了一个容差值，可以将奖励分+容差范围内的倍数结果也显示出来以供参考。容差值可选范围0~30
+                    显然，当奖励倍数为整数倍时，两种算法得出的结果是一样的；而当 奖励倍数*单价 存在小数点时，品级/技能/厨具/修炼的影响<span class="bold">可能</span>会导致两种算法的结果存在一份菜谱一分的误差（游戏里显示的会比算出来的少一分）。所以设置了一个容差值，打开容差开关后，<span class="bold">可以根据 菜谱份数 和 单价*倍数 智能筛选出所有符合条件的带误差的结果</span>。
                 </p>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -191,8 +194,8 @@
                     height: window.innerHeight - 60,
                     max: '5',
                     step: '1',
-                    tolerance: 0,
                     num: 3,
+                    tolerance: true,
                     repices: [],
                     repices_c: [1, 1, 1, 1, 1, 1],
                     result: '0',
@@ -203,11 +206,6 @@
                     r4: '菜谱4',
                     r5: '菜谱5',
                     r6: '菜谱6',
-                    f_t: [
-                        { text: '大于0', value: 1 },
-                        { text: '等于0', value: 0 },
-                        { text: '小于0', value: -1 }
-                    ],
                     r1_f: [],
                     r2_f: [],
                     r3_f: [],
@@ -578,12 +576,6 @@
                     ]
                 },
                 mounted() {
-                    this.r1_f = this.f_t;
-                    this.r2_f = this.f_t;
-                    this.r3_f = this.f_t;
-                    this.r4_f = this.f_t;
-                    this.r5_f = this.f_t;
-                    this.r6_f = this.f_t;
                     $(document).ready(() => {
                         $(main).removeClass('hidden');
                     });
@@ -594,17 +586,58 @@
                 methods: {
                     filterHandler(value, row, column) {
                         const property = column['property'];
-                        if (value == 1) {
-                            return row[property] > 0;
-                        } else if (value == 0) {
-                            return row[property] == 0;
-                        } else if (value == -1) {
-                            return row[property] < 0;
+                        return row[property] == value;
+                    },
+                    /**
+                     * @param {array} multiples 倍数
+                     * @param {array} cnts 份数
+                     * @param {array} values 单价
+                     * @param {int} tolerance 容差
+                     **/
+                    check(multiples, cnts, values, tolerance) {
+                        if (Math.ceil(this.step) == this.step || tolerance == 0) {
+                            return true;
+                        } else {
+                            let count = multiples.map((multiple, index) => {
+                                let result = multiple * values[index];
+                                if (Math.ceil(result) != result) {
+                                    return cnts[index];
+                                } else {
+                                    return -1;
+                                }
+                            });
+                            count = count.filter(cnt => {
+                                return cnt != -1;
+                            });
+                            let possible = count.length == 1 ? count : this.listAll(count);
+                            possible.unshift(0);
+                            return possible.indexOf(tolerance) > -1;
                         }
+                    },
+                    listAll(arr) {
+                        for (var a2 = []; a2.push([]) < arr.length;) {
+                            var l = Math.pow(2, arr.length) - 1;
+                        }
+                        for (let i = 1; i <= l; i++) {
+                            let s2 = i.toString(2).split("").reverse();
+                            let t = 0;
+                            let m = -1;
+                            for (var k = 0; k < s2.length; k++) {
+                                if (s2[k] == "1") {
+                                    t += arr[k];
+                                    m++;
+                                }
+                            }
+                            a2[m].push(t);
+                        }
+                        a2 = a2.flat();
+                        a2 = a2.filter((item, index) => {
+                            return index == a2.indexOf(item);
+                        });
+                        return a2;
                     },
                     toTry () {
                         let count = 0;
-                        let tolerance = this.tolerance || 0;
                         this.tableData = [];
                         for (let i of this.repices) {
                             if (i != '') {
@@ -678,26 +711,61 @@
                                 );
                             }
                         }
+                        this.r1_f = this.setFilter(this.tableData, 'v1');
+                        this.r2_f = this.setFilter(this.tableData, 'v2');
+                        this.r3_f = this.setFilter(this.tableData, 'v3');
+                        this.r4_f = this.setFilter(this.tableData, 'v4');
+                        this.r5_f = this.setFilter(this.tableData, 'v5');
+                        this.r6_f = this.setFilter(this.tableData, 'v6');
+                    },
+                    setFilter(data, key) {
+                        if (data.length > 0 && data[0][key]) {
+                            let arr = data.map(item => {
+                                return item[key]
+                            });
+                            arr = arr.filter((item, index) => {
+                                return index == arr.indexOf(item);
+                            });
+                            arr.sort();
+                            arr = arr.map(item => {
+                                return { text: item, value: item };
+                            });
+                            return arr;
+                        } else {
+                            return [];
+                        }
                     },
                     three(a, a_n, b, b_n, c, c_n, result) {
                         let count = 0;
-                        let tolerance = this.tolerance || 0;
+                        let tolerance = 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
-                        let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
-                        let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
-                        let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
+                        let c_1 = this.repices_c[0] || 1;
+                        let c_2 = this.repices_c[1] || 1;
+                        let c_3 = this.repices_c[2] || 1;
+                        for (let i = 0; i < 3; i++) {
+                            tolerance += (this.repices_c[i] || 1);
+                        }
+                        tolerance = this.tolerance && step != Math.ceil(step) ? tolerance : 0;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3;
                                     if (x >= result && (x - result) <= tolerance) {
-                                        count ++;
-                                        this.r1 = a_n;
-                                        this.r2 = b_n;
-                                        this.r3 = c_n;
-                                        this.tableData.push({ v1: i, v2: j, v3: k, score: x, error: x - result });
+                                        let check = this.check(
+                                            [i, j, k],
+                                            [c_1, c_2, c_3],
+                                            [a, b, c],
+                                            x - result
+                                        );
+                                        if (check) {
+                                            count ++;
+                                            this.r1 = a_n;
+                                            this.r2 = b_n;
+                                            this.r3 = c_n;
+                                            this.tableData.push({ v1: i, v2: j, v3: k, score: x, error: x - result});
+                                        }
                                     }
                                     if (i == max && j == max && k == max) {
                                         this.$message.success({
@@ -711,7 +779,7 @@
                     },
                     four(a, a_n, b, b_n, c, c_n, d, d_n, result) {
                         let count = 0;
-                        let tolerance = this.tolerance || 0;
+                        let tolerance = 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -719,18 +787,30 @@
                         let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
                         let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
                         let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
+                        for (let i = 0; i < 4; i++) {
+                            tolerance += (this.repices_c[i] || 1);
+                        }
+                        tolerance = this.tolerance && step != Math.ceil(step) ? tolerance : 0;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
                                     for (let o = min; o <= max; o += step) {
                                         let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4;
                                         if (x >= result && (x - result) <= tolerance) {
-                                            count ++;
-                                            this.r1 = a_n;
-                                            this.r2 = b_n;
-                                            this.r3 = c_n;
-                                            this.r4 = d_n;
-                                            this.tableData.push({ v1: i, v2: j, v3: k , v4: o, score: x, error: x - result});
+                                            let check = this.check(
+                                                [i, j, k, o],
+                                                [c_1, c_2, c_3, c_4],
+                                                [a, b, c, d],
+                                                x - result
+                                            );
+                                            if (check) {
+                                                count ++;
+                                                this.r1 = a_n;
+                                                this.r2 = b_n;
+                                                this.r3 = c_n;
+                                                this.r4 = d_n;
+                                                this.tableData.push({ v1: i, v2: j, v3: k , v4: o, score: x, error: x - result});
+                                            }
                                         }
                                         if (i == max && j == max && k == max && o == max) {
                                             this.$message.success({
@@ -745,7 +825,7 @@
                     },
                     five(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, result) {
                         let count = 0;
-                        let tolerance = this.tolerance || 0;
+                        let tolerance = 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -754,6 +834,10 @@
                         let c_3 = this.repices_c[2] ? this.repices_c[2] : 1;
                         let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
                         let c_5 = this.repices_c[4] ? this.repices_c[4] : 1;
+                        for (let i = 0; i < 5; i++) {
+                            tolerance += (this.repices_c[0] || 1);
+                        }
+                        tolerance = this.tolerance && step != Math.ceil(step) ? tolerance : 0;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
@@ -761,13 +845,21 @@
                                         for (let p = min; p <= max; p += step) {
                                             let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5;
                                             if (x >= result && (x - result) <= tolerance) {
-                                                count ++;
-                                                this.r1 = a_n;
-                                                this.r2 = b_n;
-                                                this.r3 = c_n;
-                                                this.r4 = d_n;
-                                                this.r5 = e_n;
-                                                this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, score: x, error: x - result});
+                                                let check = this.check(
+                                                    [i, j, k, o, p],
+                                                    [c_1, c_2, c_3, c_4, c_5],
+                                                    [a, b, c, d, e],
+                                                    x - result
+                                                );
+                                                if (check) {
+                                                    count ++;
+                                                    this.r1 = a_n;
+                                                    this.r2 = b_n;
+                                                    this.r3 = c_n;
+                                                    this.r4 = d_n;
+                                                    this.r5 = e_n;
+                                                    this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, score: x, error: x - result});
+                                                }
                                             }
                                             if (i == max && j == max && k == max && o == max && p == max) {
                                                 this.$message.success({
@@ -783,7 +875,7 @@
                     },
                     six(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, f, f_n, result) {
                         let count = 0;
-                        let tolerance = this.tolerance || 0;
+                        let tolerance = 0;
                         let min = parseInt(this.min);
                         let max = parseInt(this.max);
                         let step = parseFloat(this.step);
@@ -793,6 +885,10 @@
                         let c_4 = this.repices_c[3] ? this.repices_c[3] : 1;
                         let c_5 = this.repices_c[4] ? this.repices_c[4] : 1;
                         let c_6 = this.repices_c[5] ? this.repices_c[5] : 1;
+                        for (let i = 0; i < 6; i++) {
+                            tolerance += (this.repices_c[0] || 1);
+                        }
+                        tolerance = this.tolerance && step != Math.ceil(step) ? tolerance : 0;
                         for (let i = min; i <= max; i += step) {
                             for (let j = min; j <= max; j += step) {
                                 for (let k = min; k <= max; k += step) {
@@ -801,14 +897,22 @@
                                             for (let q = min; q <= max; q += step) {
                                                 let x = Math.ceil(i * a) * c_1 + Math.ceil(j * b) * c_2 + Math.ceil(k * c) * c_3 + Math.ceil(o * d) * c_4 + Math.ceil(p * e) * c_5 + Math.ceil(q * f) * c_6;
                                                     if (x >= result && (x - result) <= tolerance) {
-                                                        count ++;
-                                                        this.r1 = a_n;
-                                                        this.r2 = b_n;
-                                                        this.r3 = c_n;
-                                                        this.r4 = d_n;
-                                                        this.r5 = e_n;
-                                                        this.r6 = f_n;
-                                                        this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q, score: x, error: x - result});
+                                                        let check = this.check(
+                                                            [i, j, k, o, p, q],
+                                                            [c_1, c_2, c_3, c_4, c_5, c_6],
+                                                            [a, b, c, d, e, f],
+                                                            x - result
+                                                        );
+                                                        if (check) {
+                                                            count ++;
+                                                            this.r1 = a_n;
+                                                            this.r2 = b_n;
+                                                            this.r3 = c_n;
+                                                            this.r4 = d_n;
+                                                            this.r5 = e_n;
+                                                            this.r6 = f_n;
+                                                            this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q, score: x, error: x - result});
+                                                        }
                                                     }
                                                     if (i == max && j == max && k == max && o == max && p == max && q == max) {
                                                         this.$message.success({
@@ -833,6 +937,12 @@
                         this.r4 = '菜谱4';
                         this.r5 = '菜谱5';
                         this.r6 = '菜谱6';
+                        this.r1_f = [];
+                        this.r2_f = [];
+                        this.r3_f = [];
+                        this.r4_f = [];
+                        this.r5_f = [];
+                        this.r6_f = [];
                     }
                 }
             });
