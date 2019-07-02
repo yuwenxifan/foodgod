@@ -657,11 +657,14 @@
                             }
                             a2[m].push(t);
                         }
-                        a2 = a2.flat();
-                        a2 = a2.filter((item, index) => {
-                            return index == a2.indexOf(item);
+                        let a3 = [];
+                        for (let item of a2) {
+                            a3 = a3.concat(item);
+                        }
+                        a3 = a3.filter((item, index) => {
+                            return index == a3.indexOf(item);
                         });
-                        return a2;
+                        return a3;
                     },
                     toTry () {
                         let count = 0;
