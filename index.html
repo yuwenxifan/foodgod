@@ -93,6 +93,9 @@
             right: 16px;
             width: 91%;
         }
+        .el-checkbox__label {
+            padding-left: 5px;
+        }
     </style>
 </head>
 
@@ -130,13 +133,14 @@
                         <el-option
                             v-for="(r, i) in data"
                             :key="i"
-                            :label="r.name + '(' + r.value + ')'"
+                            :label="r.name + '(' + (repices_x[index] ? Math.ceil(r.value * 105 / 100) : r.value) + ')'"
                             :value="r.name + ',' + r.value">
                         </el-option>
                     </el-select>
                     <div class="text">*</div>
                     <el-input-number v-model="repices_c[index]" :controls="false" :min="1" :max="50" class="number"></el-input-number>
                     <div class="text">份</div>
+                    <el-checkbox v-model="repices_x[index]" border>已修</el-checkbox>
                 </el-form-item>
                 <el-form-item label="奖励分">
                     <el-input v-model="result" style="width: 210px" class="input-text"></el-input>
@@ -202,6 +206,7 @@
                     tolerance: true,
                     repices: [],
                     repices_c: [1, 1, 1, 1, 1, 1],
+                    repices_x: [false, false, false, false, false, false],
                     result: '0',
                     tableData: [],
                     r1: '菜谱1',
@@ -690,10 +695,11 @@
                         } else if (parseFloat(this.step) <= 0) {
                             this.$message.warning('步长必须大于0');
                         } else {
-                            let repices = this.repices.map(item => {
+                            let repices = this.repices.map((item, index) => {
+                                const ratio = this.repices_x[index] ? 105 : 100;
                                 return {
                                     name: item.split(',')[0],
-                                    value: parseInt(item.split(',')[1])
+                                    value: Math.ceil(parseInt(item.split(',')[1]) * ratio / 100)
                                 }
                             });
                             if (this.num == 3) {
