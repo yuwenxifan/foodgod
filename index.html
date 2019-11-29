@@ -628,6 +628,21 @@
                         { id: 0, name: "菠萝油条虾", value: 1205 },
                         { id: 0, name: "佛手观音莲", value: 1555 },
                         { id: 0, name: "聚宝盆", value: 1650 },
+
+                        { id: 0, name: '银河蛋糕', value: 1675 },
+                        { id: 0, name: '老干妈蛋糕', value: 1104 },
+                        { id: 0, name: '臊子面', value: 675 },
+                        { id: 0, name: '魔力橙沙拉', value: 597 },
+                        { id: 0, name: '食堂乱炖', value: 408 },
+                        { id: 0, name: '马猴烧酒', value: 730 },
+                        { id: 0, name: '海鲜甜甜圈', value: 1132 },
+                        { id: 0, name: '天才杯', value: 198 },
+                        { id: 0, name: '鞑靼牛排', value: 1298 },
+                        { id: 0, name: '仙人掌盆栽', value: 1038 },
+                        { id: 0, name: '春川铁板鸡', value: 475 },
+                        { id: 0, name: '培根甘蓝', value: 169 },
+                        { id: 0, name: '炒面面包', value: 1294 },
+                        { id: 0, name: '豆腐脑', value: 168 },
                     ]
                 },
                 mounted() {
@@ -680,17 +695,17 @@
                             return possible.indexOf(tolerance) > -1;
                         }
                     },
-                    listAll(arr) {
+                    listAll(arr, num) {
                         for (var a2 = []; a2.push([]) < arr.length;) {
                             var l = Math.pow(2, arr.length) - 1;
                         }
                         for (let i = 1; i <= l; i++) {
                             let s2 = i.toString(2).split("").reverse();
-                            let t = 0;
+                            let t = [];
                             let m = -1;
                             for (var k = 0; k < s2.length; k++) {
                                 if (s2[k] == "1") {
-                                    t += arr[k];
+                                    t.push(arr[k]);
                                     m++;
                                 }
                             }
