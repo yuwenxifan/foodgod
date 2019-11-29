@@ -247,11 +247,10 @@
                     initData() {
                         const that = this;
                         $.ajax({
-                            url: 'https://raw.githubusercontent.com/foodgame/foodgame.github.io/master/data/data.min.json',
+                            url: 'https://foodgame.github.io/data/data.min.json',
                         }).success(rst => {
-                            let data = JSON.parse(rst);
-                            data = data.recipes;
-                            this.data = data.map(item => {
+                            const data = rst.recipes;
+                            that.data = data.map(item => {
                                 return {
                                     id: item.recipeId,
                                     name: item.name,
@@ -259,7 +258,25 @@
                                 };
                             });
                         }).fail(err => {
-                            that.$message.error('调用图鉴网数据出错');
+                            that.$message.error('调用图鉴网数据出错，使用备用本地数据，可能不全');
+                            that.standbyInitData();
+                        });
+                    },
+                    standbyInitData() {
+                        const that = this;
+                        $.ajax({
+                            url: 'data/data.min.json',
+                        }).success(rst => {
+                            const data = rst.recipes;
+                            that.data = data.map(item => {
+                                return {
+                                    id: item.recipeId,
+                                    name: item.name,
+                                    value: item.price
+                                };
+                            });
+                        }).fail(err => {
+                            that.$message.error('调用本地数据也出错了是什么鬼');
                         });
                     },
                     filterHandler(value, row, column) {
