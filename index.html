@@ -162,6 +162,10 @@
         </div>
         <el-dialog title="说明" :visible.sync="dialogVisible" :width="dialogWidth">
             <div class="message">
+                <p>
+                    国内镜像：<a href="https://yuwenxifan.gitee.io/foodgod">https://yuwenxifan.gitee.io/foodgod</a><br/>
+                    国外镜像：<a href="https://yuwenxifan.github.io/foodgod">https://yuwenxifan.github.io/foodgod</a>
+                </p>
                 <p style="font-size: 15px;">
                     本网页为爆炒江湖厨神试菜组试菜所设计，用于辅助快速确定菜谱倍数。<br/>
                     我们的目标是：有朝一日能够有钱到一道一道试菜，去tm的计算器！
@@ -231,6 +235,12 @@
                 },
                 mounted() {
                     this.initData();
+                    if (window.location.origin === 'https://yuwenxifan.github.io') {
+                        this.$message({
+                            showClose: true,
+                            message: '新增国内镜像，地址https://yuwenxifan.gitee.io/foodgod/'
+                        });
+                    }
                     $(document).ready(() => {
                         $(main).removeClass('hidden');
                     });
@@ -264,6 +274,7 @@
                                 };
                             });
                         }).fail(err => {
+                            console.log(err);
                             that.$message.error('调用图鉴网数据出错，使用备用本地数据，可能不全');
                             that.standbyInitData();
                         });
