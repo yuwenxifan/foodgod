@@ -147,6 +147,7 @@
                 </el-form-item>
             </el-form>
             <el-button style="float: right" size="small" @click="toTry">计算</el-button>
+            <el-button style="float: right; margin-right: 10px;" size="small" @click="reset">重置</el-button>
         </div>
         <div class="right">
             <el-table :data="tableData" style="width: 100%" :height="height">
@@ -262,22 +263,22 @@
                 methods: {
                     initData() {
                         const that = this;
-                        $.ajax({
-                            url: 'https://foodgame.github.io/data/data.min.json',
-                        }).success(rst => {
-                            const data = rst.recipes;
-                            that.data = data.map(item => {
-                                return {
-                                    id: item.recipeId,
-                                    name: item.name,
-                                    value: item.price
-                                };
-                            });
-                        }).fail(err => {
-                            console.log(err);
-                            that.$message.error('调用图鉴网数据出错，使用备用本地数据，可能不全');
+                        // $.ajax({
+                        //     url: 'https://foodgame.github.io/data/data.min.json',
+                        // }).success(rst => {
+                        //     const data = rst.recipes;
+                        //     that.data = data.map(item => {
+                        //         return {
+                        //             id: item.recipeId,
+                        //             name: item.name,
+                        //             value: item.price
+                        //         };
+                        //     });
+                        // }).fail(err => {
+                        //     console.log(err);
+                        //     that.$message.error('调用图鉴网数据出错，使用备用本地数据，可能不全');
                             that.standbyInitData();
-                        });
+                        // });
                     },
                     standbyInitData() {
                         const that = this;
@@ -433,6 +434,12 @@
                         this.r4_f = this.setFilter(this.tableData, 'v4');
                         this.r5_f = this.setFilter(this.tableData, 'v5');
                         this.r6_f = this.setFilter(this.tableData, 'v6');
+                    },
+                    reset() {
+                        this.repices = [];
+                        this.repices_x = [false, false, false, false, false, false];
+                        this.repices_c = [1, 1, 1, 1, 1, 1];
+                        this.result = '0';
                     },
                     setFilter(data, key) {
                         if (data.length > 0 && (data[0][key] || data[0][key] == 0)) {
