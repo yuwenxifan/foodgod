@@ -283,7 +283,7 @@
                     standbyInitData() {
                         const that = this;
                         $.ajax({
-                            url: 'data/data.min.json',
+                            url: 'data/data.min.json?v=1',
                         }).success(rst => {
                             const data = rst.recipes;
                             that.data = data.map(item => {
