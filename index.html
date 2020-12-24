@@ -263,22 +263,22 @@
                 methods: {
                     initData() {
                         const that = this;
-                        // $.ajax({
-                        //     url: 'https://foodgame.github.io/data/data.min.json',
-                        // }).success(rst => {
-                        //     const data = rst.recipes;
-                        //     that.data = data.map(item => {
-                        //         return {
-                        //             id: item.recipeId,
-                        //             name: item.name,
-                        //             value: item.price
-                        //         };
-                        //     });
-                        // }).fail(err => {
-                        //     console.log(err);
-                        //     that.$message.error('调用图鉴网数据出错，使用备用本地数据，可能不全');
+                        $.ajax({
+                            url: 'https://bcjh.xyz/api/get_recipe',
+                        }).success(rst => {
+                            const data = rst;
+                            that.data = data.map(item => {
+                                return {
+                                    id: item.id,
+                                    name: item.name,
+                                    value: item.price
+                                };
+                            });
+                        }).fail(err => {
+                            console.log(err);
+                            that.$message.error('调用数据出错，使用备用本地数据，可能不全');
                             that.standbyInitData();
-                        // });
+                        });
                     },
                     standbyInitData() {
                         const that = this;
@@ -347,9 +347,18 @@
                         for (let item of a2) {
                             a3 = a3.concat(item);
                         }
-                        a3 = a3.filter((item, index) => {
-                            return index == a3.indexOf(item);
+                        a3 = a3.map(i => {
+                            if (typeof i == 'object') {
+                                let r = 0;
+                                for (let j of i) {
+                                    r = r + j;
+                                }
+                                return r;
+                            } else {
+                                return i;
+                            }
                         });
+                        a3 = Array.from(new Set(a3));
                         return a3;
                     },
                     toTry () {
@@ -461,8 +470,8 @@
                     three(a, a_n, b, b_n, c, c_n, result) {
                         let count = 0;
                         let tolerance = 0;
-                        let min = parseInt(this.min);
-                        let max = parseInt(this.max);
+                        let min = parseFloat(this.min);
+                        let max = parseFloat(this.max);
                         let step = parseFloat(this.step);
                         let c_1 = this.repices_c[0] || 1;
                         let c_2 = this.repices_c[1] || 1;
@@ -490,21 +499,19 @@
                                             this.tableData.push({ v1: i, v2: j, v3: k, score: x, error: x - result});
                                         }
                                     }
-                                    if (i == max && j == max && k == max) {
-                                        this.$message.success({
-                                            showClose: true,
-                                            message: `尝试完毕，共有${count}种结果`
-                                        });
-                                    }
                                 }
                             }
                         }
+                        this.$message.success({
+                            showClose: true,
+                            message: `尝试完毕，共有${count}种结果`
+                        });
                     },
                     four(a, a_n, b, b_n, c, c_n, d, d_n, result) {
                         let count = 0;
                         let tolerance = 0;
-                        let min = parseInt(this.min);
-                        let max = parseInt(this.max);
+                        let min = parseFloat(this.min);
+                        let max = parseFloat(this.max);
                         let step = parseFloat(this.step);
                         let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
                         let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
@@ -535,22 +542,20 @@
                                                 this.tableData.push({ v1: i, v2: j, v3: k , v4: o, score: x, error: x - result});
                                             }
                                         }
-                                        if (i == max && j == max && k == max && o == max) {
-                                            this.$message.success({
-                                                showClose: true,
-                                                message: `尝试完毕，共有${count}种结果`
-                                            })
-                                        }
                                     }
                                 }
                             }
                         }
+                        this.$message.success({
+                            showClose: true,
+                            message: `尝试完毕，共有${count}种结果`
+                        })
                     },
                     five(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, result) {
                         let count = 0;
                         let tolerance = 0;
-                        let min = parseInt(this.min);
-                        let max = parseInt(this.max);
+                        let min = parseFloat(this.min);
+                        let max = parseFloat(this.max);
                         let step = parseFloat(this.step);
                         let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
                         let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
@@ -584,23 +589,21 @@
                                                     this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, score: x, error: x - result});
                                                 }
                                             }
-                                            if (i == max && j == max && k == max && o == max && p == max) {
-                                                this.$message.success({
-                                                    showClose: true,
-                                                    message: `尝试完毕，共有${count}种结果`
-                                                })
-                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        this.$message.success({
+                            showClose: true,
+                            message: `尝试完毕，共有${count}种结果`
+                        })
                     },
                     six(a, a_n, b, b_n, c, c_n, d, d_n, e, e_n, f, f_n, result) {
                         let count = 0;
                         let tolerance = 0;
-                        let min = parseInt(this.min);
-                        let max = parseInt(this.max);
+                        let min = parseFloat(this.min);
+                        let max = parseFloat(this.max);
                         let step = parseFloat(this.step);
                         let c_1 = this.repices_c[0] ? this.repices_c[0] : 1;
                         let c_2 = this.repices_c[1] ? this.repices_c[1] : 1;
@@ -637,20 +640,18 @@
                                                             this.tableData.push({ v1: i, v2: j, v3: k , v4: o, v5: p, v6: q, score: x, error: x - result});
                                                         }
                                                     }
-                                                    if (i == max && j == max && k == max && o == max && p == max && q == max) {
-                                                        this.$message.success({
-                                                            showClose: true,
-                                                            message: `尝试完毕，共有${count}种结果`
-                                                        })
-                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
+                            this.$message.success({
+                                showClose: true,
+                                message: `尝试完毕，共有${count}种结果`
+                            })
                         }
-                    }
-                },
+                    },
                 watch: {
                     num() {
                         this.tableData = [];
